@@ -1,0 +1,78 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/game/player.gd" id="1_lqo4f"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_tilum"]
+radius = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e60mx"]
+albedo_color = Color(0.2, 0.75, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_ei05o"]
+material = SubResource("StandardMaterial3D_e60mx")
+radius = 1.0
+height = 2.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vsybk"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ck5me"]
+material = SubResource("StandardMaterial3D_vsybk")
+size = Vector3(0.5, 0.5, 0.8)
+
+[sub_resource type="Animation" id="Animation_c6qgg"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Model/PlaceholderBody:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_83aoc"]
+length = 0.2
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Model/PlaceholderBody:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(1, 1, 1), Vector3(0.75, 0.75, 1.35), Vector3(1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_adne5"]
+_data = {
+&"RESET": SubResource("Animation_c6qgg"),
+&"dash": SubResource("Animation_83aoc")
+}
+
+[node name="Player" type="CharacterBody3D" unique_id=1880504480]
+collision_layer = 2
+collision_mask = 5
+motion_mode = 1
+script = ExtResource("1_lqo4f")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=522264917]
+shape = SubResource("SphereShape3D_tilum")
+
+[node name="Model" type="Node3D" parent="." unique_id=1562626808]
+
+[node name="PlaceholderBody" type="MeshInstance3D" parent="Model" unique_id=41812356]
+mesh = SubResource("SphereMesh_ei05o")
+
+[node name="PlaceholderNose" type="MeshInstance3D" parent="Model" unique_id=1156874834]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+mesh = SubResource("BoxMesh_ck5me")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1222084340]
+libraries/ = SubResource("AnimationLibrary_adne5")

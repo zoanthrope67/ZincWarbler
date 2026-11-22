@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/game/player_bullet.gd" id="1_mo8t6"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_heflo"]
+radius = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t1du2"]
+shading_mode = 0
+albedo_color = Color(1, 0.9, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_5rlpm"]
+material = SubResource("StandardMaterial3D_t1du2")
+radius = 0.25
+height = 0.5
+radial_segments = 12
+rings = 6
+
+[node name="PlayerBullet" type="Area3D" unique_id=478239508]
+collision_layer = 8
+collision_mask = 5
+monitorable = false
+script = ExtResource("1_mo8t6")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=523063893]
+shape = SubResource("SphereShape3D_heflo")
+
+[node name="PlaceholderMesh" type="MeshInstance3D" parent="." unique_id=354919462]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_5rlpm")

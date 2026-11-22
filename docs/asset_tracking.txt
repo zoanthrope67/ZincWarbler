@@ -12,6 +12,12 @@ src/gfx/placeholder/placeholder_theme.tres
     Only sets the default font size (40) with Godot's built-in font.
     Replace with the final UI theme and font.
 
+src/gfx/placeholder/placeholder_wall_library.tres
+    MeshLibrary used by the arena GridMap. One item, "PlaceholderWall":
+    a grey-blue 4 x 4 x 4 m box with a matching box collision shape.
+    Replace with a MeshLibrary made from the final wall models (keep box
+    collision shapes for performance).
+
 Nodes inside scenes
 -------------------
 src/scn/bootstrap.tscn -> PlaceholderLoading
@@ -20,3 +26,24 @@ src/scn/bootstrap.tscn -> PlaceholderLoading
 src/scn/main_menu.tscn -> Center/Layout/PlaceholderTitleSplash
     "ZINC WARBLER" text label. The spec asks for a title splash image;
     replace with a TextureRect showing the final splash.
+
+src/scn/game/player.tscn -> Model/PlaceholderBody, Model/PlaceholderNose
+    Blue 2 m sphere with a white box on its front (+Z) to show facing.
+    Replace both with the player model as children of Model (front facing +Z).
+src/scn/game/player.tscn -> AnimationPlayer, animations "dash" and "RESET"
+    Placeholder dash animation: stretches PlaceholderBody along its facing.
+    Keep the animation names; the code plays "dash" during a dash and
+    "RESET" when it ends.
+
+src/scn/game/player_bullet.tscn -> PlaceholderMesh
+    Yellow unshaded 0.5 m sphere.
+
+src/scn/game/flag.tscn -> PlaceholderPole, PlaceholderBanner
+    Grey pole with a green box banner.
+
+src/scn/game/arena.tscn -> PlaceholderFloor, PlaceholderLight, PlaceholderEnvironment
+    Plain dark floor plane (visual only, no collision), one directional
+    light without shadows, and flat ambient lighting.
+src/scn/game/arena.tscn -> Walls (GridMap cell layout), spawn points and flags
+    A test layout (20 x 15 cells, 80 x 60 m) for prototyping. Expected to be
+    redesigned by the game designer.

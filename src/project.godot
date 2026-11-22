@@ -81,9 +81,19 @@ pause={
 ]
 }
 
+[layer_names]
+
+3d_physics/layer_1="Walls"
+3d_physics/layer_2="Player"
+3d_physics/layer_3="Enemies"
+3d_physics/layer_4="Player Bullets"
+3d_physics/layer_5="Enemy Bullets"
+3d_physics/layer_6="Flags"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
+common/physics_interpolation=true
 
 [rendering]
 

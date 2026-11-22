@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://csvt3s8gxm7ev"]
+
+[ext_resource type="Script" uid="uid://cexap147kgpks" path="res://scripts/states/main_menu.gd" id="1_main_menu"]
+[ext_resource type="Script" uid="uid://rofuw1tsv1gp" path="res://scripts/ui/menu_list.gd" id="2_menu_list"]
+
+[node name="MainMenu" type="Control" unique_id=877887899]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main_menu")
+
+[node name="Center" type="CenterContainer" parent="." unique_id=1635366038]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Layout" type="VBoxContainer" parent="Center" unique_id=170671]
+layout_mode = 2
+theme_override_constants/separation = 96
+
+[node name="PlaceholderTitleSplash" type="Label" parent="Center/Layout" unique_id=890746396]
+layout_mode = 2
+theme_override_font_sizes/font_size = 128
+text = "ZINC WARBLER"
+horizontal_alignment = 1
+
+[node name="Menu" type="VBoxContainer" parent="Center/Layout" unique_id=1017751435]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 16
+script = ExtResource("2_menu_list")
+
+[node name="StartGame" type="Label" parent="Center/Layout/Menu" unique_id=1465904614]
+layout_mode = 2
+text = "Start Game"
+horizontal_alignment = 1
+
+[node name="ViewHiscores" type="Label" parent="Center/Layout/Menu" unique_id=878767496]
+layout_mode = 2
+text = "View Hiscores"
+horizontal_alignment = 1
+
+[node name="ConfigOptions" type="Label" parent="Center/Layout/Menu" unique_id=639573219]
+layout_mode = 2
+text = "Config Options"
+horizontal_alignment = 1
+
+[node name="QuitGame" type="Label" parent="Center/Layout/Menu" unique_id=611860156]
+layout_mode = 2
+text = "Quit Game"
+horizontal_alignment = 1
