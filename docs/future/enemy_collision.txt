@@ -1,0 +1,3 @@
+Consider if enemies should die when they hit the player? Maybe there is a small area around the player that destroys enemies on hit?
+
+Bosses must be immune to this and should block player collision.

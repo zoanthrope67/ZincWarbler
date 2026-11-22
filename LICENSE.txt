@@ -1,0 +1,4 @@
+Private code, All rights reserved.
+
+Third-party assets are not covered by this notice and remain under
+their original licences; see docs/credits.txt.

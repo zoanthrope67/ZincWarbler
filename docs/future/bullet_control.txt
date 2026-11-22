@@ -1,0 +1,1 @@
+Enemy Bullets should have a helper function that allows the designer easier control over new enemies

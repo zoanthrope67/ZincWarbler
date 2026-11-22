@@ -1,0 +1,1 @@
+Flags could be changed from objects that the player touches to an area that the player stands in? And they gain points over time and the area gets smaller and the flag is collected when they leave the area?
