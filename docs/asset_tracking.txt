@@ -1,4 +1,22 @@
 ZINC WARBLER - ASSET TRACKING
 =============================
 
-None yet
+Placeholder assets made by Claude. Each should be replaced by a human-made asset
+and then removed from this list. Placeholder files and nodes start with
+"placeholder" / "Placeholder" so they are easy to search for.
+
+Files
+-----
+src/gfx/placeholder/placeholder_theme.tres
+    UI theme used by every screen (Project Settings > GUI > Theme > Custom).
+    Only sets the default font size (40) with Godot's built-in font.
+    Replace with the final UI theme and font.
+
+Nodes inside scenes
+-------------------
+src/scn/bootstrap.tscn -> PlaceholderLoading
+    "Loading..." text label. The spec asks for a "Loading..." graphic.
+
+src/scn/main_menu.tscn -> Center/Layout/PlaceholderTitleSplash
+    "ZINC WARBLER" text label. The spec asks for a title splash image;
+    replace with a TextureRect showing the final splash.
