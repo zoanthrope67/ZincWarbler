@@ -1,0 +1,229 @@
+class_name Enemy
+extends CharacterBody3D
+## Shared behaviour for every enemy and boss.
+##
+## Life of an enemy:
+##   1. Fading in (FADE_IN_SECONDS): the model fades from invisible to visible.
+##      It does not move, cannot hurt the player and cannot be hit. It has no
+##      collision layer or mask, so bullets and the player pass through it.
+##   2. Active: it moves and attacks (see each enemy's own script). It blocks
+##      the player, and touching the player hurts them.
+##   3. Defeated: after `max_hits` hits from player bullets it is removed.
+##
+## To make a new enemy: make a scene like scn/game/chaser.tscn, and a script that
+## extends Enemy and overrides _on_activated() and/or _active_physics_process().
+## Use shoot_at_target() to fire an enemy bullet at the player.
+##
+## Required child nodes:
+##   CollisionShape3D - a SphereShape3D (its radius is the enemy's size)
+##   Hurtbox          - an Area3D a little larger than the body; touching the
+##                      player inside it hurts them
+##   Model            - everything visible; turned to face +Z towards its heading
+
+# --- FX signals (effects and sounds only) ----------------------------------------
+signal fx_spawn_started(position: Vector3)
+signal fx_activated(position: Vector3)
+signal fx_hit(position: Vector3, hits_left: int)
+signal fx_defeated(position: Vector3)
+signal fx_shot_fired(position: Vector3, direction: Vector3)
+
+# --- Game logic signals ------------------------------------------------------------
+## Emitted once when the enemy is defeated, just before it is removed.
+signal defeated(enemy: Enemy)
+
+## Seconds an enemy takes to fade in before it becomes active.
+const FADE_IN_SECONDS := 0.25
+## How far from its edge an enemy's bullets appear, in meters.
+const BULLET_SPAWN_GAP := 0.3
+
+## Player bullet hits needed to defeat this enemy.
+@export var max_hits := 2
+## Score given to the player when this enemy is defeated.
+@export var score_value := 0
+## True for bosses (they are spawned by the flags, not by the enemy spawner).
+@export var is_boss := false
+
+## The player. Set by whoever spawns the enemy. When the player is dead their
+## node stays where they died, so enemies keep aiming at the last known position.
+var player: Player = null
+## Where this enemy's bullets come from. Set by whoever spawns the enemy.
+var bullet_pool: EnemyBulletPool = null
+
+var hits_left := 0
+var is_active := false
+## The enemy's radius in meters, read from its CollisionShape3D.
+var body_radius := 1.0
+
+var _fade_time := 0.0
+var _is_defeated := false
+# Temporary see-through copies of the model's materials, used only while fading
+# in: [{"mesh": MeshInstance3D, "surface": int, "material": BaseMaterial3D,
+# "alpha": float (the material's own alpha)}]
+var _fade_materials: Array[Dictionary] = []
+
+@onready var _model: Node3D = $Model
+@onready var _hurtbox: Area3D = $Hurtbox
+
+
+func _ready() -> void:
+	hits_left = max_hits
+	motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
+	var shape := ($CollisionShape3D as CollisionShape3D).shape
+	if shape is SphereShape3D:
+		body_radius = shape.radius
+
+	# Start faded out with no collision.
+	collision_layer = 0
+	collision_mask = 0
+	_hurtbox.monitoring = false
+	_start_fade_materials(_model)
+	_set_fade_amount(0.0)
+	fx_spawn_started.emit(global_position)
+
+
+func _physics_process(delta: float) -> void:
+	if _is_defeated:
+		return
+	if not is_active:
+		_fade_time += delta
+		_set_fade_amount(clampf(_fade_time / FADE_IN_SECONDS, 0.0, 1.0))
+		if _fade_time >= FADE_IN_SECONDS:
+			_activate()
+		return
+
+	_active_physics_process(delta)
+	global_position.y = Gameplay.PLANE_HEIGHT
+	_hurt_player_if_touching()
+
+
+## Called by player bullets. Does nothing while fading in.
+func take_hit() -> void:
+	if not is_active or _is_defeated:
+		return
+	hits_left -= 1
+	fx_hit.emit(global_position, hits_left)
+	if hits_left <= 0:
+		_defeat()
+
+
+# --- For enemy scripts to override ---------------------------------------------------
+
+## Called once when the fade-in finishes.
+func _on_activated() -> void:
+	pass
+
+
+## Called every physics frame while active. Move and attack here.
+func _active_physics_process(_delta: float) -> void:
+	pass
+
+
+# --- Helpers for enemy scripts ---------------------------------------------------------
+
+## Where the enemy is aiming: the player, or where the player died.
+func get_target_position() -> Vector3:
+	if player != null and is_instance_valid(player):
+		return Gameplay.on_plane(player.global_position)
+	return global_position
+
+
+## Unit vector on the gameplay plane towards the target, or zero if already there.
+func direction_to_target() -> Vector3:
+	var offset := get_target_position() - global_position
+	offset.y = 0.0
+	if offset.length() < 0.05:
+		return Vector3.ZERO
+	return offset.normalized()
+
+
+## Fires one enemy bullet at the target. `speed` is in meters per second.
+func shoot_at_target(speed := EnemyBullet.DEFAULT_SPEED) -> void:
+	var direction := direction_to_target()
+	if direction == Vector3.ZERO or bullet_pool == null:
+		return
+	var start := global_position + direction * (body_radius + BULLET_SPAWN_GAP)
+	bullet_pool.fire(start, direction, speed)
+	fx_shot_fired.emit(start, direction)
+
+
+## Turns the model to face a direction on the gameplay plane.
+func face(direction: Vector3) -> void:
+	if direction == Vector3.ZERO:
+		return
+	_model.look_at(_model.global_position + direction, Vector3.UP, true)
+
+
+## True if a collision was with a wall.
+func is_wall(collision: KinematicCollision3D) -> bool:
+	var layer := PhysicsServer3D.body_get_collision_layer(collision.get_collider_rid())
+	return layer & Gameplay.LAYER_WALLS != 0
+
+
+# --- Internals -------------------------------------------------------------------
+
+func _activate() -> void:
+	is_active = true
+	_end_fade_materials()
+	collision_layer = Gameplay.LAYER_ENEMIES
+	# Enemies stop at walls and at the player, but pass through each other.
+	collision_mask = Gameplay.LAYER_WALLS | Gameplay.LAYER_PLAYER
+	_hurtbox.monitoring = true
+	_on_activated()
+	fx_activated.emit(global_position)
+
+
+# Touching the player hurts them. The player's invulnerability after a hit stops
+# this from removing health every frame.
+func _hurt_player_if_touching() -> void:
+	for body in _hurtbox.get_overlapping_bodies():
+		if body is Player:
+			body.take_damage()
+
+
+func _defeat() -> void:
+	_is_defeated = true
+	is_active = false
+	# Deferred: this usually runs inside a bullet's collision callback, where
+	# physics settings cannot be changed.
+	set_deferred("collision_layer", 0)
+	set_deferred("collision_mask", 0)
+	_hurtbox.set_deferred("monitoring", false)
+	fx_defeated.emit(global_position)
+	defeated.emit(self)
+	queue_free()
+
+
+# Gives every mesh surface under `node` a see-through copy of its material.
+# Works with any StandardMaterial3D / ORMMaterial3D; surfaces using a
+# ShaderMaterial are left as they are (they will pop in instead of fading).
+func _start_fade_materials(node: Node) -> void:
+	for child in node.get_children():
+		var mesh_instance := child as MeshInstance3D
+		if mesh_instance != null and mesh_instance.mesh != null:
+			for surface in mesh_instance.get_surface_override_material_count():
+				var original := mesh_instance.get_active_material(surface) as BaseMaterial3D
+				if original != null:
+					var copy: BaseMaterial3D = original.duplicate()
+					copy.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+					_fade_materials.append({
+						"mesh": mesh_instance,
+						"surface": surface,
+						"material": copy,
+						"alpha": original.albedo_color.a,
+						"previous_override": mesh_instance.get_surface_override_material(surface),
+					})
+					mesh_instance.set_surface_override_material(surface, copy)
+		_start_fade_materials(child)
+
+
+# 0 = invisible, 1 = fully visible.
+func _set_fade_amount(amount: float) -> void:
+	for entry in _fade_materials:
+		entry.material.albedo_color.a = entry.alpha * amount
+
+
+# Removes the see-through copies so the model draws normally (and cheaply) again.
+func _end_fade_materials() -> void:
+	for entry in _fade_materials:
+		entry.mesh.set_surface_override_material(entry.surface, entry.previous_override)
+	_fade_materials.clear()

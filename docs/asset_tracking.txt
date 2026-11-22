@@ -41,6 +41,23 @@ src/scn/game/player_bullet.tscn -> PlaceholderMesh
 src/scn/game/flag.tscn -> PlaceholderPole, PlaceholderBanner
     Grey pole with a green box banner.
 
+src/scn/game/enemy_bullet.tscn -> PlaceholderMesh
+    Purple unshaded 0.5 m sphere.
+
+src/scn/game/chaser.tscn -> Model/PlaceholderBody, Model/PlaceholderNose
+    Red 2 m sphere with a dark box on its front (+Z).
+
+src/scn/game/tank.tscn -> Model/PlaceholderBody, Model/PlaceholderBarrel
+    Orange box with a dark cylinder barrel pointing forward (+Z).
+
+src/scn/game/angry_greg.tscn -> Model/PlaceholderBody, Model/PlaceholderNose,
+                                Model/PlaceholderBrowLeft, Model/PlaceholderBrowRight
+    Dark red 4 m sphere with a box nose and two slanted "angry" brow boxes.
+
+Enemy models: put replacements under each enemy's Model node, front facing +Z.
+The fade-in works with StandardMaterial3D/ORMMaterial3D materials; meshes using
+a ShaderMaterial will appear without fading.
+
 src/scn/game/arena.tscn -> PlaceholderFloor, PlaceholderLight, PlaceholderEnvironment
     Plain dark floor plane (visual only, no collision), one directional
     light without shadows, and flat ambient lighting.

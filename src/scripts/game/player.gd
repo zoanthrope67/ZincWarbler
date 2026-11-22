@@ -292,8 +292,10 @@ func _die() -> void:
 	velocity = Vector3.ZERO
 	_invulnerable_left = 0.0
 	visible = false
-	collision_layer = 0
-	collision_mask = 0
+	# Deferred: the killing hit may arrive inside an enemy bullet's collision
+	# callback, where physics settings cannot be changed.
+	set_deferred("collision_layer", 0)
+	set_deferred("collision_mask", 0)
 	set_physics_process(false)
 	fx_died.emit(global_position)
 	died.emit()

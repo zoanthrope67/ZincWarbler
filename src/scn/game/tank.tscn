@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/game/tank.gd" id="1_80exi"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_4k51u"]
+radius = 1.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_qbke0"]
+radius = 1.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xpa7e"]
+albedo_color = Color(1, 0.55, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_52hxc"]
+material = SubResource("StandardMaterial3D_xpa7e")
+size = Vector3(1.6, 1.2, 1.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wmenw"]
+albedo_color = Color(0.3, 0.2, 0.1, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_k6md1"]
+material = SubResource("StandardMaterial3D_wmenw")
+top_radius = 0.2
+bottom_radius = 0.2
+height = 1.2
+
+[node name="Tank" type="CharacterBody3D" unique_id=1745206124]
+collision_layer = 0
+collision_mask = 0
+motion_mode = 1
+script = ExtResource("1_80exi")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1526586350]
+shape = SubResource("SphereShape3D_4k51u")
+
+[node name="Hurtbox" type="Area3D" parent="." unique_id=567492479]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox" unique_id=1324901964]
+shape = SubResource("SphereShape3D_qbke0")
+
+[node name="Model" type="Node3D" parent="." unique_id=1084792978]
+
+[node name="PlaceholderBody" type="MeshInstance3D" parent="Model" unique_id=429399318]
+mesh = SubResource("BoxMesh_52hxc")
+
+[node name="PlaceholderBarrel" type="MeshInstance3D" parent="Model" unique_id=2114554224]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.2, 1)
+mesh = SubResource("CylinderMesh_k6md1")

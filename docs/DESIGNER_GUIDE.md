@@ -7,7 +7,7 @@ Where to change things in Zinc Warbler. All paths are inside `src/`.
 | Folder | Contents |
 |---|---|
 | `scn/` | Scenes: one per game state, e.g. `main_menu.tscn`, `in_game.tscn` |
-| `scn/game/` | Gameplay scenes: `arena.tscn`, `player.tscn`, `player_bullet.tscn`, `flag.tscn` |
+| `scn/game/` | Gameplay scenes: `arena.tscn`, `player.tscn`, `player_bullet.tscn`, `flag.tscn`, `chaser.tscn`, `tank.tscn`, `angry_greg.tscn`, `enemy_bullet.tscn` |
 | `scripts/autoload/` | Global scripts that are always running: `GameState`, `Settings`, `Hiscores` |
 | `scripts/states/` | One script per state screen |
 | `scripts/game/` | Gameplay scripts (player, bullets, arena, flags, camera) |
@@ -86,7 +86,7 @@ The game is played on a flat plane 1 m above the floor (`PLANE_HEIGHT` in
 
 | Constant | What it does |
 |---|---|
-| `MOVE_SPEED` | Walking speed, meters per second (3) |
+| `MOVE_SPEED` | Walking speed, meters per second (currently 15; the spec says 3) |
 | `FIRE_INTERVAL` | Seconds between shots while Confirm is held (0.2) |
 | `BULLET_SPAWN_DISTANCE` | How far in front of the player bullets appear |
 | `DASH_SPEED_MULTIPLIER` | Dash speed as a multiple of `MOVE_SPEED` (3) |
@@ -107,8 +107,65 @@ animation in the `AnimationPlayer` plays during a dash; `RESET` plays when it en
 
 | Constant | What it does |
 |---|---|
-| `SPEED` | Meters per second (5) |
+| `SPEED` | Meters per second (currently 30; the spec says 5) |
 | `LIFETIME` | Seconds before a bullet disappears on its own (5) |
+
+## Enemies
+
+Every enemy scene has settings on its root node in the Inspector:
+
+| Setting | What it does |
+|---|---|
+| `Max Hits` | Player bullet hits to defeat it (Chaser 2, Tank 2, Angry Greg 5) |
+| `Score Value` | Score when defeated (Chaser 0, Tank 0, Angry Greg 10) |
+| `Is Boss` | Marks bosses |
+
+Behaviour numbers are constants at the top of each script:
+
+| Script | Constants |
+|---|---|
+| `scripts/game/enemy.gd` (all enemies) | `FADE_IN_SECONDS` (0.25), `BULLET_SPAWN_GAP` |
+| `scripts/game/chaser.gd` | `SPEED` (2) |
+| `scripts/game/tank.gd` | `SPEED` (1), `FIRE_INTERVAL` (4), `BULLET_SPEED` |
+| `scripts/game/angry_greg.gd` | `FIRE_INTERVAL` (4), `BULLET_SPEED` |
+
+Enemy size comes from the sphere in each scene's `CollisionShape3D`. The `Hurtbox`
+sphere should be slightly bigger (0.1 m); touching the player inside it hurts them.
+Enemies block the player but pass through each other.
+
+**Adding a new enemy:** copy `scn/game/chaser.tscn`, give it a new script that
+starts with `extends Enemy`, and fill in `_on_activated()` (runs once, when the
+fade-in ends) and `_active_physics_process(delta)` (runs every frame after that).
+Helpers you can use: `direction_to_target()`, `get_target_position()`,
+`shoot_at_target(speed)`, `face(direction)` and `is_wall(collision)`.
+Then add the scene to the spawner's or the flag loop's list (below).
+
+## Enemy bullets (`scripts/game/enemy_bullet.gd`, `scripts/game/enemy_bullet_pool.gd`)
+
+| Constant | What it does |
+|---|---|
+| `EnemyBullet.DEFAULT_SPEED` | Meters per second when an enemy does not set its own (2) |
+| `EnemyBullet.LIFETIME` | Seconds before an unused bullet disappears (10) |
+| `EnemyBulletPool.STARTING_SIZE` | Bullets made when a game starts (128) |
+| `EnemyBulletPool.GROW_BY` | Bullets added when the pool runs out (a message is logged when this happens) |
+
+## Enemy spawning (`EnemySpawner` node in `scn/in_game.tscn`)
+
+Select the EnemySpawner node and change these in the Inspector:
+
+| Setting | What it does |
+|---|---|
+| `Spawn Interval` | Seconds between enemies (5) |
+| `Min Spawn Distance`, `Max Spawn Distance` | Only EnemySpawnPoints this far from the player are used (20 to 100 m) |
+| `Retry Delay` | Wait before trying again when no spawn point is usable (0.25) |
+| `Enemy Scenes` | The enemies that can appear, equal chance each. Add a scene twice to make it twice as common |
+
+## Flags and bosses (`FlagLoop` node in `scn/in_game.tscn`)
+
+| Setting | What it does |
+|---|---|
+| `Boss Scenes` (Inspector) | Bosses that can appear, equal chance each |
+| `FLAG_SCORE` (constant in `scripts/game/flag_loop.gd`) | Score for touching a flag (1) |
 
 ## Camera (`Camera` node in `scn/in_game.tscn`)
 
@@ -135,6 +192,12 @@ uses them. Connect to them to add effects.
 |---|---|
 | Player | `fx_shot_fired`, `fx_dash_started`, `fx_dash_ended`, `fx_dash_attempted_during_cooldown`, `fx_hurt`, `fx_invulnerability_started`, `fx_invulnerability_ended`, `fx_died` |
 | PlayerBullet | `fx_hit_wall`, `fx_hit_enemy`, `fx_expired` |
+| Every enemy and boss | `fx_spawn_started`, `fx_activated`, `fx_hit`, `fx_defeated`, `fx_shot_fired` |
+| EnemyBullet | `fx_hit_wall`, `fx_hit_player`, `fx_expired` |
+| Flag | `fx_touched`, `fx_restored` |
+
+To react to every enemy, connect to the EnemySpawner's `enemy_spawned(enemy)`
+signal (a game logic signal) and connect to the new enemy's `fx_` signals there.
 
 ## Where the user:// folder is
 
