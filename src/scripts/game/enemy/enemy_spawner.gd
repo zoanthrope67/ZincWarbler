@@ -1,7 +1,8 @@
 class_name EnemySpawner
 extends Node
-## Spawns a whole bag of enemies in a random order, then does the next bag.
-## Repeats the final bag over and over when it runs out.
+## Spawns enemies in waves (see EnemyWave). Waves come from bags: a bag is a
+## list of waves played in a random order. When a bag runs out, the next one is
+## chosen by the danger level (InGame.danger_level) in get_bag_via_danger().
 ##
 ## Waves can overlap. A new wave starts every `next_wave_delay` seconds (taken
 ## from the wave that just started), whether or not earlier waves have finished.

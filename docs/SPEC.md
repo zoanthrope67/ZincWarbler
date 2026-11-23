@@ -103,10 +103,20 @@ Angry Greg is 4x4 meters large.
 
 The human game designer will add more enemies at a later date, this is subject to change.
 
-Every 5 seconds a random enemy appears at a random EnemySpawnPoint, unless the player has been defeated. The list of valid EnemySpawnPoints is any EnemySpawnPoint that is:
+Normal enemies spawn in waves. A wave sets:
+ * which enemy it spawns (one type per wave),
+ * how many enemies it spawns (at least 1),
+ * the seconds between each enemy of the wave (0 spawns the whole wave at once),
+ * the seconds from the start of the wave until the next wave starts.
+
+Waves can overlap: if the next wave starts before a wave has spawned all its enemies, both waves carry on spawning. Every enemy of a wave appears at the same EnemySpawnPoint, chosen at random from the valid EnemySpawnPoints when the wave starts. Later enemies of the wave still use that point, even if it is no longer valid. The list of valid EnemySpawnPoints is any EnemySpawnPoint that is:
  * Between 20 - 100 units of the player. This will be changed often by the human game designer for feel.
 
-If there is no valid EnemySpawnPoint then a debug message should be logged and the spawn should be deferred for 0.25 seconds. This should also push back the spawn after this, so that multiple enemies cannot spawn at once.
+Waves are taken from bags. A bag is a list of waves played in a random order. When a bag runs out, the next bag is chosen by the current Danger Level (see Danger Level). A bag always plays all its waves, even if the Danger Level changes meanwhile. The bags, and the Danger Level thresholds that choose them, are written in code so that the game designer can change them often.
+
+The first wave starts 1 second after the game starts. No wave starts and no enemy spawns once the player has been defeated.
+
+If there is no valid EnemySpawnPoint when a wave is due to start then a debug message should be logged and the wave should be deferred for 0.25 seconds. The waves after it are pushed back by the same amount.
 
 When an enemy appears it fades in over 0.25 seconds. During this time it does not move and cannot hurt or be hurt, so an enemy never hits the player the instant it appears. It then becomes active.
 
@@ -118,9 +128,13 @@ Enemy bullets are a 0.5 meter purple sphere. A bullet pooling system should be u
 
 ### Flags
 
-The arena has multiple flags at static positions. When the player touches a flag, they should gain 1 score and the flag should be hidden and marked as inactive. Once all flags have been touched, a random Boss enemy should be spawned. Once the boss enemy is defeated, the flags should be restored, with the exception of the one flag that is closest to the player. If the player touches all flags again then a new boss should spawn. Play will continue in this loop until the player is defeated.
+The arena has multiple flags at static positions. When the player touches a flag, they should gain 1 score and 10 Danger, and the flag should be hidden and marked as inactive. Once all flags have been touched, a random Boss enemy should be spawned. Once the boss enemy is defeated, the flags should be restored, with the exception of the one flag that is closest to the player. If the player touches all flags again then a new boss should spawn. Play will continue in this loop until the player is defeated.
 
 Each flag must have its own set of BossSpawnPoints. When a boss is spawned, a random BossSpawnPoint that belongs to the latest touched flag must be used to set the position of the Boss. If any flag in the arena does not have a BossSpawnPoint then the error must be raised and play should be stopped. The human game designer will then fix this manually.
+
+### Danger Level
+
+The Danger Level starts at 0 at the start of every game. It rises by 1 every second while the player is alive, and by 10 each time the player touches a flag. It stops rising once the player is defeated. The Danger Level chooses which bag of enemy waves is used next: the higher the Danger Level, the more dangerous the bag. More ways to raise the Danger Level will be added at a later date.
 
 ## Name Entry State
 

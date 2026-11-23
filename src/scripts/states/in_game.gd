@@ -44,9 +44,10 @@ var time_survived := 0.0
 var score := 0
 ## Seconds since the player died, or -1 while they are alive.
 var time_since_death := -1.0
-## Current Danger Level. As Danger increases, more powerful enemy bags are used.
-## Danger currently increase by 1 every second. Later feutres will add more ways
-# to increase Danger
+## Current Danger Level. As Danger increases, more powerful enemy bags are used
+## (see get_bag_via_danger() in scripts/game/enemy/enemy_spawner.gd).
+## Danger increases by 1 every second the player is alive, and by 10 for each
+## flag touched. Later features will add more ways to increase Danger.
 var danger_level := 0.0
 
 # Fixed at the moment the player dies.
@@ -89,6 +90,7 @@ func _ready() -> void:
 	_player.health_changed.connect(_hud.set_health)
 	score_changed.connect(_hud.set_score)
 
+## Adds `danger_delta` to the danger level. Use this for every source of danger.
 func increase_danger(danger_delta: float) -> void:
 	danger_level += danger_delta;
 

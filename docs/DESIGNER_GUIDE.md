@@ -10,7 +10,8 @@ Where to change things in Zinc Warbler. All paths are inside `src/`.
 | `scn/game/` | Gameplay scenes: `arena.tscn`, `player.tscn`, `player_bullet.tscn`, `flag.tscn`, `chaser.tscn`, `tank.tscn`, `angry_greg.tscn`, `enemy_bullet.tscn` |
 | `scripts/autoload/` | Global scripts that are always running: `GameState`, `Settings`, `Hiscores` |
 | `scripts/states/` | One script per state screen |
-| `scripts/game/` | Gameplay scripts (player, bullets, arena, flags, camera) |
+| `scripts/game/` | Gameplay scripts (player, player bullets, arena, flags, camera) |
+| `scripts/game/enemy/` | Enemies, enemy bullets and their pool, the enemy spawner and `EnemyWave` |
 | `scripts/ui/` | Shared UI pieces (the keyboard/controller menu) |
 | `gfx/placeholder/` | Placeholder art, see `docs/asset_tracking.txt` |
 | `gfx/`, `bgm/`, `sfx/` | Final graphics, music and sound effects |
@@ -73,7 +74,7 @@ Saved hi-scores live in `user://hiscores.json`.
 |---|---|
 | `Walls` | GridMap. Select it and paint tiles with the GridMap panel at the bottom of the editor. Each cell is 4 x 4 m and 4 m tall. Tiles come from `gfx/placeholder/placeholder_wall_library.tres` |
 | `PlayerSpawnPoints` | Add `Marker3D` children. The player starts on one at random |
-| `EnemySpawnPoints` | Add `Marker3D` children (used from phase 3) |
+| `EnemySpawnPoints` | Add `Marker3D` children. Enemy waves start on these (see Enemy spawning) |
 | `Flags` | Add instances of `scn/game/flag.tscn`. Give each flag one or more `Marker3D` children: those are its BossSpawnPoints. Keep them a few meters from the flag |
 
 Only the X and Z position of markers matters. When a game starts the arena is
@@ -126,10 +127,10 @@ Behaviour numbers are constants at the top of each script:
 
 | Script | Constants |
 |---|---|
-| `scripts/game/enemy.gd` (all enemies) | `FADE_IN_SECONDS` (0.25), `BULLET_SPAWN_GAP` |
-| `scripts/game/chaser.gd` | `SPEED` (2) |
-| `scripts/game/tank.gd` | `SPEED` (1), `FIRE_INTERVAL` (4), `BULLET_SPEED` |
-| `scripts/game/angry_greg.gd` | `FIRE_INTERVAL` (4), `BULLET_SPEED` |
+| `scripts/game/enemy/enemy.gd` (all enemies) | `FADE_IN_SECONDS` (0.25), `BULLET_SPAWN_GAP` |
+| `scripts/game/enemy/chaser.gd` | `SPEED` (2) |
+| `scripts/game/enemy/tank.gd` | `SPEED` (1), `FIRE_INTERVAL` (4), `BULLET_SPEED` |
+| `scripts/game/enemy/angry_greg.gd` | `FIRE_INTERVAL` (4), `BULLET_SPEED` |
 
 Enemy size comes from the sphere in each scene's `CollisionShape3D`. The `Hurtbox`
 sphere should be slightly bigger (0.1 m); touching the player inside it hurts them.
@@ -143,9 +144,10 @@ Helpers you can use: `direction_to_target()`, `get_target_position()`,
 `move_sliding(motion)` (move and glide along walls; cheaper than Godot's
 `move_and_slide()`) and `is_pushing_into_player(direction)` (skip moving when
 already pressed against the player). See the Tank script for an example.
-Then add the scene to the spawner's or the flag loop's list (below).
+Then use the scene in a wave in the spawner's bags, or add it to the flag
+loop's boss list (both below).
 
-## Enemy bullets (`scripts/game/enemy_bullet.gd`, `scripts/game/enemy_bullet_pool.gd`)
+## Enemy bullets (`scripts/game/enemy/enemy_bullet.gd`, `scripts/game/enemy/enemy_bullet_pool.gd`)
 
 | Constant | What it does |
 |---|---|
@@ -154,20 +156,63 @@ Then add the scene to the spawner's or the flag loop's list (below).
 | `EnemyBulletPool.STARTING_SIZE` | Bullets made when a game starts (128) |
 | `EnemyBulletPool.GROW_BY` | Bullets added when the pool runs out (a message is logged when this happens) |
 
-## Enemy spawning (`EnemySpawner` node in `scn/in_game.tscn`)
+## Enemy spawning (`scripts/game/enemy/enemy_spawner.gd`)
 
-Select the EnemySpawner node and change these in the Inspector:
+Normal enemies arrive in **waves**, and waves come from **bags**. Which bag is
+used depends on the **danger level**.
+
+### Waves (`scripts/game/enemy/enemy_wave.gd`)
+
+A wave is a group of one type of enemy, written in code as
+`EnemyWave.new(enemy, count, wave_delay_seconds, next_wave_delay)`:
+
+| Field | What it does |
+|---|---|
+| `enemy` | The enemy scene, e.g. `CHASER` or `TANK` (constants at the top of the spawner) |
+| `count` | How many enemies the wave spawns (1 or more) |
+| `wave_delay_seconds` | Seconds between each enemy of the wave. 0 spawns the whole wave at once |
+| `next_wave_delay` | Seconds from the **start** of this wave until the next wave starts |
+
+Every enemy of a wave appears at the same EnemySpawnPoint. The point is chosen
+when the wave starts, from the points 20 to 100 m from the player. Later
+enemies of the wave still use it even if the player has moved close to it since.
+
+Waves can overlap: if `next_wave_delay` is shorter than the wave takes to
+spawn, the next wave starts while this one is still spawning. A `next_wave_delay`
+of 0 starts the next wave on the following frame.
+
+### Bags and danger
+
+A bag is a list of waves, played in a random order. When a bag runs out, the
+next one is chosen by the danger level at that moment, in
+`get_bag_via_danger()` in the spawner. The bags and their danger thresholds
+(currently below 10, below 50, below 100, and 100 or more) are written out
+there; edit that function to change them. A bag always plays all its waves,
+even if danger crosses a threshold meanwhile.
+
+The danger level is `danger_level` in `scripts/states/in_game.gd`:
+
+- It goes up by 1 every second the player is alive.
+- Touching a flag adds 10 (`increase_danger(10)` in `scripts/game/flag_loop.gd`).
+- It stops rising when the player dies or the game is paused.
+
+Call `increase_danger(amount)` on the In Game scene to add other sources of danger.
+
+### Settings
+
+Select the EnemySpawner node in `scn/in_game.tscn` and change these in the Inspector:
 
 | Setting | What it does |
 |---|---|
-| `Spawn Interval` | Seconds between enemies (5) |
-| `Min Spawn Distance`, `Max Spawn Distance` | Only EnemySpawnPoints this far from the player are used (20 to 100 m) |
+| `Min Spawn Distance`, `Max Spawn Distance` | Only EnemySpawnPoints this far from the player are used when a wave starts (20 to 100 m) |
 | `Retry Delay` | Wait before trying again when no spawn point is usable (0.25) |
-| `Enemy Scenes` | The enemies that can appear, equal chance each. Add a scene twice to make it twice as common |
 
-For your own spawning logic (such as waves), `get_time_survived()` in
-`scripts/game/enemy_spawner.gd` returns the seconds the player has survived. It
-counts game time only (not while paused) and stops when the player dies.
+The first wave starts 1 second into the game (`_time_until_next_wave` in
+`setup()`). Spawning stops while the game is paused and once the player is dead.
+
+For time-based spawning logic, `get_time_survived()` in the spawner returns the
+seconds the player has survived. It counts game time only (not while paused)
+and stops when the player dies.
 
 ## Flags and bosses (`FlagLoop` node in `scn/in_game.tscn`)
 
@@ -175,6 +220,7 @@ counts game time only (not while paused) and stops when the player dies.
 |---|---|
 | `Boss Scenes` (Inspector) | Bosses that can appear, equal chance each |
 | `FLAG_SCORE` (constant in `scripts/game/flag_loop.gd`) | Score for touching a flag (1) |
+| `increase_danger(10)` (in `_on_flag_touched()` in the same file) | Danger added for touching a flag (10) |
 
 ## Camera (`Camera` node in `scn/in_game.tscn`)
 
