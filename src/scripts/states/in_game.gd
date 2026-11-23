@@ -18,6 +18,8 @@ extends Node3D
 ##   FlagLoop       - flags, scoring for flags and bosses appearing
 ##   Camera         - follows the player
 ##   HUD            - score, time, health and the "YOU DIED" banner
+##   PauseMenu      - the pause menu and the countdown when resuming
+##                    (scripts/ui/pause_menu.gd)
 ##
 ## When the player dies (docs/SPEC.md, In Game State):
 ##   - the score, time survived and the date/time the game ended are fixed,
@@ -64,6 +66,7 @@ var _game_ended := false
 @onready var _flag_loop: FlagLoop = $FlagLoop
 @onready var _camera: FollowCamera = $Camera
 @onready var _hud: Hud = $HUD
+@onready var _pause_menu: PauseMenu = $PauseMenu
 
 
 func _ready() -> void:
@@ -89,6 +92,8 @@ func _ready() -> void:
 	_hud.setup(Player.MAX_HEALTH)
 	_player.health_changed.connect(_hud.set_health)
 	score_changed.connect(_hud.set_score)
+
+	_pause_menu.setup(self, _player)
 
 ## Adds `danger_delta` to the danger level. Use this for every source of danger.
 func increase_danger(danger_delta: float) -> void:

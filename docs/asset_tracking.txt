@@ -74,5 +74,13 @@ src/scn/ui/hud.tscn -> TopBar labels, YouDied (Dim, Banner, ContinueHint), Anima
     Plain text score/time, a dark overlay and a red "YOU DIED" label that types
     in ("you_died") then pulses ("you_died_loop"). Keep those animation names.
 
+src/scn/ui/pause_menu.tscn -> MenuScreen (Dim, Title, Menu, HoldBar, Warning)
+    Dark overlay with a "PAUSED" text title, text menu items, Godot's default
+    ProgressBar as the hold bar, and an orange text warning.
+src/scn/ui/pause_menu.tscn -> CountdownScreen/PlaceholderCountdownNumber, AnimationPlayer
+    Large yellow outlined "3", "2", "1" text. The "countdown_tick" animation
+    pops it in (scale and fade) once per number. The spec asks for animated
+    sprites; keep the animation name, the code plays "countdown_tick" for each number.
+
 src/scn/name_entry.tscn, src/scn/game_over.tscn
     Text-only layouts using the placeholder theme.

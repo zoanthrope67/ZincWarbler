@@ -12,7 +12,7 @@ Where to change things in Zinc Warbler. All paths are inside `src/`.
 | `scripts/states/` | One script per state screen |
 | `scripts/game/` | Gameplay scripts (player, player bullets, arena, flags, camera) |
 | `scripts/game/enemy/` | Enemies, enemy bullets and their pool, the enemy spawner and `EnemyWave` |
-| `scripts/ui/` | Shared UI pieces (the keyboard/controller menu) |
+| `scripts/ui/` | Shared UI pieces (the keyboard/controller menu, the HUD, the pause menu) |
 | `gfx/placeholder/` | Placeholder art, see `docs/asset_tracking.txt` |
 | `gfx/`, `bgm/`, `sfx/` | Final graphics, music and sound effects |
 
@@ -23,7 +23,8 @@ Where to change things in Zinc Warbler. All paths are inside `src/`.
   Changes here become the game's defaults and what "Reset Controls to Default" restores.
 - Players can rebind one keyboard key and one controller button per action on the Config screen.
   The left stick on the move actions and everything on `pause` are fixed.
-- Reserved inputs that can never be bound (Escape, Start): `RESERVED_KEYS` and
+- `pause` (Escape, Start) opens the pause menu in game. Escape and Start are
+  reserved and can never be bound to anything else: `RESERVED_KEYS` and
   `RESERVED_JOY_BUTTONS` in `scripts/autoload/settings.gd`.
 - Which actions appear on the Config screen, and their names: `REBINDABLE_ACTIONS` in
   `scripts/autoload/settings.gd`.
@@ -246,6 +247,32 @@ Open the scenes to restyle them; the code only sets text and plays animations.
 
 One pip is made per point of `MAX_HEALTH`.
 
+## Pause menu (`scn/ui/pause_menu.tscn`, `scripts/ui/pause_menu.gd`)
+
+Pause opens the menu while the player is alive and pauses the whole game.
+- **Resume** is instant: the menu closes and a 3, 2, 1 countdown plays before
+  the game carries on. Pause cannot be pressed again during the countdown.
+- **Restart** and **Exit** need Confirm held until the bar fills. They start a
+  new game or go to the Main Menu without saving the score.
+- While the menu is open, Pause works like choosing Resume, and Back moves the
+  cursor to Resume.
+
+| What | Where |
+|---|---|
+| Hold time for Restart / Exit | `HOLD_SECONDS` in `scripts/ui/pause_menu.gd` (0.5) |
+| Countdown start number (one number per second) | `COUNTDOWN_FROM` in the same file (3) |
+| Hi-score warning text | `HISCORE_WARNING_TEXT` in the same file. It shows on Restart and Exit when the score would make the table |
+| Menu items | Labels under `Menu` in `scn/ui/pause_menu.tscn`. If you reorder them, reorder `Item` in the script to match |
+| Menu look (dim, title, hold bar, warning) | `MenuScreen` in `scn/ui/pause_menu.tscn` |
+| Countdown number and its animation | `CountdownScreen` and the `AnimationPlayer` (`countdown_tick`, played once per number) in the same scene |
+
+The pause menu node's **Process Mode** is **Always**, so it keeps running while
+the rest of the game is paused. Anything you add that must move during the
+pause (e.g. an animated background for the menu) must go under it.
+
+When play resumes, Confirm and Back need a fresh press, so the Confirm used to
+choose Resume does not start firing.
+
 ## End of a game (`scripts/states/in_game.gd`)
 
 | Constant | What it does |
@@ -277,6 +304,7 @@ uses them. Connect to them to add effects.
 | EnemyBullet | `fx_hit_wall`, `fx_hit_player`, `fx_expired` |
 | Flag | `fx_touched`, `fx_restored` |
 | InGame | `fx_you_died_shown`, `fx_continue_available` |
+| PauseMenu | `fx_pause_menu_entered`, `fx_pause_resume`, `fx_countdown(number)` (3, 2, 1), `fx_pause_restart`, `fx_pause_exit`. These run while the game is paused, so effects connected to them must have their Process Mode set to Always |
 | Name Entry screen | `fx_cursor_moved`, `fx_character_added`, `fx_character_removed`, `fx_press_refused`, `fx_name_saved` |
 
 To react to every enemy, connect to the EnemySpawner's `enemy_spawned(enemy)`

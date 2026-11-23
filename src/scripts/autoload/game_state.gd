@@ -80,6 +80,9 @@ func change_state(new_state: State) -> void:
 
 	previous_state = current_state
 	current_state = new_state
+	# The pause menu's Restart and Exit change state while the game is paused.
+	# Pausing would carry over to the new scene, so always un-pause.
+	get_tree().paused = false
 	# Godot frees the old scene at the end of this frame, so nothing leaks.
 	get_tree().change_scene_to_file(scene_path)
 	state_changed.emit(previous_state, current_state)
@@ -94,6 +97,7 @@ func raise_error(message: String) -> void:
 		return
 	previous_state = current_state
 	current_state = State.ERROR
+	get_tree().paused = false
 	get_tree().change_scene_to_file(STATE_SCENES[State.ERROR])
 	state_changed.emit(previous_state, current_state)
 

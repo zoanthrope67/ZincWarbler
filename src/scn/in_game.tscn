@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://b63c3ks1drxgy" path="res://scripts/game/flag_loop.gd" id="7_flagloop"]
 [ext_resource type="PackedScene" path="res://scn/game/angry_greg.tscn" id="10_greg"]
 [ext_resource type="PackedScene" path="res://scn/ui/hud.tscn" id="11_hud"]
+[ext_resource type="PackedScene" path="res://scn/ui/pause_menu.tscn" id="12_pause"]
 
 [node name="InGame" type="Node3D" unique_id=1027778662]
 script = ExtResource("1_deroa")
@@ -39,3 +40,5 @@ far = 200.0
 script = ExtResource("4_ccgki")
 
 [node name="HUD" parent="." unique_id=973611704 instance=ExtResource("11_hud")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("12_pause")]

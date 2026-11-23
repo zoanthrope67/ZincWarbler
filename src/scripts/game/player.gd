@@ -107,6 +107,16 @@ func place_at(point: Vector3) -> void:
 	reset_physics_interpolation()
 
 
+## Called when play resumes after pausing. Stops firing, and makes Confirm and
+## Back need a fresh press if they are still held (e.g. from choosing Resume in
+## the pause menu). A dash that was under way carries on under the usual rules.
+func ignore_held_buttons() -> void:
+	if _action == Action.FIRING:
+		_action = Action.NONE
+	_confirm_blocked = Input.is_action_pressed(&"confirm")
+	_back_blocked = Input.is_action_pressed(&"back")
+
+
 ## True while the player cannot be hurt.
 func is_invulnerable() -> bool:
 	return _invulnerable_left > 0.0

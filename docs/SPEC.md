@@ -16,7 +16,7 @@ In the final project, all graphical and audio assets will be authored by humans.
 
 ## Controls
 
-The game is controlled using the Arrow Keys, Z as a confirm button and X as a back button. In game, Confirm fires and Back dashes. Escape (or Start on a controller) is reserved for use later; Escape cannot be bound to any other action. The Input Map should be used to allow easy configuration of controls at a later date. Ideally, the Godot Input Mapping should also allow game controllers to be used.
+The game is controlled using the Arrow Keys, Z as a confirm button and X as a back button. In game, Confirm fires and Back dashes. Escape (or Start on a controller) is the Pause button. The Pause button cannot be rebound, and Escape and Start cannot be bound to any other action. The Input Map should be used to allow easy configuration of controls at a later date. Ideally, the Godot Input Mapping should also allow game controllers to be used.
 
 ## FX Signals
 
@@ -52,6 +52,21 @@ The Main Menu contains a title splash image and a keyboard controlled menu. The 
 ## In Game State
 
 When in game, the player will enter the arena. The Arena is made up of a GridMap that contains the geometry, multiple flags, multiple PlayerSpawnPoints, multiple EnemySpawnPoints. When the player has no health then the game stays on the In Game screen and shows an animated "YOU DIED" banner over it. The player is hidden and disabled, all player bullets are removed and the score is locked. The time survived and the date and time the game ended are both taken at the moment the player dies. Enemies carry on moving and firing at the player's last known position. This lasts for 90 seconds, or until the player makes a fresh press of Confirm (not one held from before) once 5 seconds have passed. The game then ends. If the player's score makes the hi-score table, the game will change state to Name Entry, otherwise it will change state to a Game Over screen showing the player's score and how long they survived.
+
+### Pausing
+
+When the player presses Pause, all gameplay is paused and a pause menu is displayed. The player cannot pause while the player is dead. The menu contains:
+ * Resume - the menu disappears and gameplay resumes after 3 seconds. Animated numbers show 3, 2 and 1, and an FX signal (fx_countdown) is emitted for each with the current number as its argument. The player cannot pause again during the countdown.
+ * Restart - the game is reset to the beginning as if a new game was started. The score is not saved to the hi-score table.
+ * Exit - the game is ended and goes back to the Main Menu. The score is not saved to the hi-score table.
+
+Resume is instant. To avoid accidental button presses ending a game, the player must hold Confirm to choose Restart or Exit; a bar fills while the button is held and takes 0.5 seconds to fill. If the player's score would go into the hi-score table, a warning message is shown while Restart or Exit is selected.
+
+Pressing Pause while the pause menu is open is treated as choosing Resume. Pressing Back while in the pause menu moves the cursor to Resume but does not choose it.
+
+When gameplay resumes, Confirm and Back need a fresh press, so the press used to choose Resume does not start firing.
+
+The FX signals fx_pause_menu_entered, fx_pause_resume, fx_pause_restart and fx_pause_exit are emitted for effects.
 
 ### Prestartup Validation
 
