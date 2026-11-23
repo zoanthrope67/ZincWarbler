@@ -68,7 +68,7 @@ It is the designer's responsibility to place spawn points in sensible places.
 
 The player begins play with 3 health and a score of 0. Each hit from an enemy or enemy bullet takes away 1 health. The player's facing at the start of the game is set as if the player pressed right.
 
-The Player can move in 8 directions and can fire bullets in 8 directions. They can fire once every 0.2 seconds and will begin firing when the confirm button is held. Tapping does not make the player shoot faster. While the button is held, the direction that the player last moved is stored and the player will fire in this direction until they release the button. The player cannot change what direction they are firing in until they release the button. The player is blocked by walls and their bullets disappear when they hit a wall. Player bullets also disappear after 5 seconds, so a gap in the arena's walls cannot leave bullets flying forever. The player's speed should be 3 meters a second and this value must be a constant value that is clearly commented so that a game designer can change it at a later date.
+The Player can move in 8 directions and can fire bullets in 8 directions. They can fire once every 0.2 seconds and will begin firing when the confirm button is held. Tapping does not make the player shoot faster. While the button is held, the direction that the player last moved is stored and the player will fire in this direction until they release the button. The player cannot change what direction they are firing in until they release the button. The player is blocked by walls and their bullets disappear when they hit a wall. Player bullets also disappear after 5 seconds, so a gap in the arena's walls cannot leave bullets flying forever. The player's speed must be a constant value that is clearly commented so that a game designer can change it at a later date.
 
 Pressing Back starts a dash in the direction the player last moved, at 3 times their normal speed. The player cannot steer during a dash. The dash lasts until Back is released, the player collides with a wall or enemy or it has travelled 12 meters in total. The game designer will playtest different dash lengths, and a designer setting (off by default) makes every dash go the full maximum distance, so releasing Back does not end it. A dash also ends when the player dies. The player cannot dash again until 2 seconds after a dash is started, and needs a fresh press of Back once the cooldown is over. The dash does not protect the player: they can be hit while dashing as normal. The player cannot shoot and dash at the same time. Whichever started first carries on, and the other button is ignored until it is pressed again, so releasing Back while Confirm is held does not start firing, and holding Back while firing does not start a dash. If Confirm and Back are pressed on the same frame, shooting wins. The dash speed, cooldown and maximum distance are constants that the game designer can change. The fx_dash_started, fx_dash_ended and fx_dash_attempted_during_cooldown FX signals are emitted for effects, and the player plays a dash animation while dashing.
 
@@ -80,7 +80,7 @@ When the game starts, the player is moved to a random PlayerSpawnPoint.
 
 ### Player Bullets
 
-Player bullets are 0.5 meter yellow spheres that travel at 5 meters a second. They disappear when they hit an enemy.
+Player bullets are 0.5 meter yellow spheres. Their speed is a constant that the game designer can change. They disappear when they hit an enemy.
 
 ### Camera
 
@@ -91,8 +91,8 @@ The camera should be Perspective view and give a view of 40 meters around the pl
 There are two types of normal enemy and one type of boss. The human game designer will add more enemies and bosses at a later date. All enemies and bosses use a sphere hitbox.
 
 The normal enemies are:
- * Chaser: Faces towards the player on first spawn and then moves in that facing. If they collide with a wall then they attempt to shapecast towards the player using a get_world_3d().direct_space_state.cast_motion that only checks walls. If they can find an unobstructed path then they face towards the player, otherwise they flip their facing 180 degrees. They move at 2 meters a second. Can take 2 hits before being defeated.
- * Tank: Moves 1 meter per second towards the player. If they collide with a wall then they slide along it. No advanced pathfinding will be required for this enemy. Fires an enemy bullet every 4 seconds towards the player with the first shot 4 seconds after they finish spawning. Can take 2 hits before being defeated.
+ * Chaser: Faces towards the player on first spawn and then moves in that facing. If they collide with a wall then they attempt to shapecast towards the player using a get_world_3d().direct_space_state.cast_motion that only checks walls. If they can find an unobstructed path then they face towards the player, otherwise they flip their facing 180 degrees. Their speed is a constant that the game designer can change. Can take 2 hits before being defeated.
+ * Tank: Moves towards the player. Their speed is a constant that the game designer can change. If they collide with a wall then they slide along it. No advanced pathfinding will be required for this enemy. Fires an enemy bullet every 4 seconds towards the player with the first shot 4 seconds after they finish spawning. Can take 2 hits before being defeated.
 
 Enemies are 2x2 meters large. Score is not awarded for killing an enemy. There should be no cap on enemy spawns for now, future development will consider this.
 
@@ -114,7 +114,7 @@ Enemies should block player collision. Fading-in enemies have no collision mask 
 
 ### Enemy Bullets
 
-Enemy bullets are a 0.5 meter purple sphere. A bullet pooling system should be used to increase performance. More bullets must be added if required. The pool should start with 128 bullets. An enemy bullet will be recycled after 10 seconds, if it collides with a player or if it collides with a wall. Enemy bullets do not collide with enemies or with other bullets. When not explicitly stated otherwise, enemy bullets should travel at 2 meters a second.
+Enemy bullets are a 0.5 meter purple sphere. A bullet pooling system should be used to increase performance. More bullets must be added if required. The pool should start with 128 bullets. An enemy bullet will be recycled after 10 seconds, if it collides with a player or if it collides with a wall. Enemy bullets do not collide with enemies or with other bullets. Enemy bullets have a default speed, a constant that the game designer can change, which is used unless an enemy sets its own.
 
 ### Flags
 

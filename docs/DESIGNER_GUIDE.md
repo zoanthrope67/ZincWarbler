@@ -88,7 +88,7 @@ The game is played on a flat plane 1 m above the floor (`PLANE_HEIGHT` in
 
 | Constant | What it does |
 |---|---|
-| `MOVE_SPEED` | Walking speed, meters per second (currently 15; the spec says 3) |
+| `MOVE_SPEED` | Walking speed, meters per second (15) |
 | `FIRE_INTERVAL` | Seconds between shots while Confirm is held (0.2) |
 | `BULLET_SPAWN_DISTANCE` | How far in front of the player bullets appear |
 | `DASH_SPEED_MULTIPLIER` | Dash speed as a multiple of `MOVE_SPEED` (3) |
@@ -109,7 +109,7 @@ animation in the `AnimationPlayer` plays during a dash; `RESET` plays when it en
 
 | Constant | What it does |
 |---|---|
-| `SPEED` | Meters per second (currently 30; the spec says 5) |
+| `SPEED` | Meters per second (30) |
 | `LIFETIME` | Seconds before a bullet disappears on its own (5) |
 
 ## Enemies
