@@ -17,16 +17,38 @@ extends Node3D
 ##   EnemySpawner   - makes normal enemies appear
 ##   FlagLoop       - flags, scoring for flags and bosses appearing
 ##   Camera         - follows the player
+##   HUD            - score, time, health and the "YOU DIED" banner
 ##
-## Still to come (phase 4): the HUD, the death sequence and the end of the game.
+## When the player dies (docs/SPEC.md, In Game State):
+##   - the score, time survived and the date/time the game ended are fixed,
+##   - the "YOU DIED" banner appears while enemies carry on,
+##   - after DEATH_SCREEN_MAX_SECONDS, or a fresh press of Confirm made once
+##     DEATH_SCREEN_SKIP_AFTER_SECONDS have passed, the game ends and moves to
+##     Name Entry (if the score makes the hi-score table) or Game Over.
 
 ## Emitted whenever the score changes (used by the HUD). Game logic signal.
 signal score_changed(score: int)
+## Emitted when the "YOU DIED" banner appears. FX only.
+signal fx_you_died_shown
+## Emitted when the player becomes able to skip the "YOU DIED" screen. FX only.
+signal fx_continue_available
+
+## Longest time, in seconds, the "YOU DIED" screen is shown before the game ends.
+const DEATH_SCREEN_MAX_SECONDS := 90.0
+## Seconds after dying before a fresh press of Confirm can end the game.
+const DEATH_SCREEN_SKIP_AFTER_SECONDS := 5.0
 
 ## Seconds the player has survived this game. Stops counting when the player dies.
 var time_survived := 0.0
 ## The player's score. Locked (no longer changes) once the player dies.
 var score := 0
+## Seconds since the player died, or -1 while they are alive.
+var time_since_death := -1.0
+
+# Fixed at the moment the player dies.
+var _seconds_survived_at_death := 0
+var _datetime_at_death := ""
+var _game_ended := false
 
 @onready var _arena: Arena = $Arena
 @onready var _player: Player = $Player
@@ -36,6 +58,7 @@ var score := 0
 @onready var _spawner: EnemySpawner = $EnemySpawner
 @onready var _flag_loop: FlagLoop = $FlagLoop
 @onready var _camera: FollowCamera = $Camera
+@onready var _hud: Hud = $HUD
 
 
 func _ready() -> void:
@@ -58,10 +81,34 @@ func _ready() -> void:
 	_camera.target = _player
 	_camera.snap_to_target()
 
+	_hud.setup(Player.MAX_HEALTH)
+	_player.health_changed.connect(_hud.set_health)
+	score_changed.connect(_hud.set_score)
+
 
 func _physics_process(delta: float) -> void:
 	if not _player.is_dead:
 		time_survived += delta
+		_hud.set_time(time_survived)
+		return
+
+	if time_since_death < 0.0:
+		return   # Arena validation failed; the player never spawned.
+	var before := time_since_death
+	time_since_death += delta
+	if before < DEATH_SCREEN_SKIP_AFTER_SECONDS and time_since_death >= DEATH_SCREEN_SKIP_AFTER_SECONDS:
+		_hud.show_continue_hint()
+		fx_continue_available.emit()
+	if time_since_death >= DEATH_SCREEN_MAX_SECONDS:
+		_end_game()
+
+
+# A Confirm press only counts if it starts after the skip time; holding Confirm
+# down from earlier (e.g. while firing when the player died) does not count.
+func _unhandled_input(event: InputEvent) -> void:
+	if time_since_death >= DEATH_SCREEN_SKIP_AFTER_SECONDS and InputHelper.is_fresh_press(event, &"confirm"):
+		get_viewport().set_input_as_handled()
+		_end_game()
 
 
 ## Adds points to the score, unless the player is dead (the score is then locked).
@@ -82,3 +129,17 @@ func _on_player_died() -> void:
 	# The spec removes all player bullets when the player dies.
 	for bullet in _player_bullets.get_children():
 		bullet.queue_free()
+
+	# Fix the results now: time survived and the date/time are taken at death.
+	_seconds_survived_at_death = floori(time_survived)
+	_datetime_at_death = Time.get_datetime_string_from_system()
+	time_since_death = 0.0
+	_hud.show_you_died()
+	fx_you_died_shown.emit()
+
+
+func _end_game() -> void:
+	if _game_ended:
+		return
+	_game_ended = true
+	GameState.end_game(score, _seconds_survived_at_death, _datetime_at_death)

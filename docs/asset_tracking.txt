@@ -64,3 +64,15 @@ src/scn/game/arena.tscn -> PlaceholderFloor, PlaceholderLight, PlaceholderEnviro
 src/scn/game/arena.tscn -> Walls (GridMap cell layout), spawn points and flags
     A test layout (20 x 15 cells, 80 x 60 m) for prototyping. Expected to be
     redesigned by the game designer.
+
+src/scn/ui/health_pip.tscn -> PlaceholderFrame, PlaceholderFill, AnimationPlayer
+    Dark square with a red fill. The "lose" animation flashes the fill white,
+    grows it, then shrinks and fades it out; "empty" leaves only the frame.
+    Keep the animation names "full", "lose" and "empty".
+
+src/scn/ui/hud.tscn -> TopBar labels, YouDied (Dim, Banner, ContinueHint), AnimationPlayer
+    Plain text score/time, a dark overlay and a red "YOU DIED" label that types
+    in ("you_died") then pulses ("you_died_loop"). Keep those animation names.
+
+src/scn/name_entry.tscn, src/scn/game_over.tscn
+    Text-only layouts using the placeholder theme.

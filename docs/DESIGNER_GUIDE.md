@@ -62,6 +62,8 @@ Saved hi-scores live in `user://hiscores.json`.
 | Menu highlight colours, wrap-around | Select a `Menu` node; `Selected Color`, `Normal Color` and `Wrap Around` are in the Inspector |
 | Rebinding timeout | `REBIND_TIMEOUT_SECONDS` in `scripts/states/config_screen.gd` |
 | Hi-score table columns and heading colour | `HEADINGS`, `HEADING_COLOR` in `scripts/states/hiscore_screen.gd` |
+| Name Entry grid width and colours | `COLUMNS`, `SELECTED_COLOR`, `NORMAL_COLOR` in `scripts/states/name_entry.gd` |
+| Delay before Confirm works on Game Over | `CONFIRM_DELAY_SECONDS` in `scripts/states/game_over.gd` (0.5) |
 | Font size for all screens | `gfx/placeholder/placeholder_theme.tres` (placeholder) |
 | Background colour | Project Settings → Rendering → Environment → Default Clear Color |
 
@@ -176,6 +178,31 @@ Select the Camera node and change these in the Inspector:
 | `View Height Meters` | Meters of the arena visible from the top to the bottom of the screen (40) |
 | `Field Of View Degrees` | Lower is flatter, with less perspective (50) |
 
+## HUD (`scn/ui/hud.tscn`) and health pips (`scn/ui/health_pip.tscn`)
+
+Open the scenes to restyle them; the code only sets text and plays animations.
+
+| What | Where |
+|---|---|
+| Score text format | `SCORE_TEXT` in `scripts/ui/hud.gd` |
+| Score / time / pip layout | `TopBar` in `scn/ui/hud.tscn` |
+| "YOU DIED" banner and its hint | `YouDied` in `scn/ui/hud.tscn` |
+| Banner animations | `AnimationPlayer` in `scn/ui/hud.tscn`: `you_died` plays once, then `you_died_loop` repeats |
+| Pip look | `scn/ui/health_pip.tscn`. Its `AnimationPlayer` has `full`, `lose` (plays when health is lost) and `empty` (shown after `lose`) |
+
+One pip is made per point of `MAX_HEALTH`.
+
+## End of a game (`scripts/states/in_game.gd`)
+
+| Constant | What it does |
+|---|---|
+| `DEATH_SCREEN_MAX_SECONDS` | Longest the "YOU DIED" screen stays up (90) |
+| `DEATH_SCREEN_SKIP_AFTER_SECONDS` | Seconds before a fresh Confirm press can end it (5) |
+
+The score, time survived and date/time are fixed at the moment the player dies.
+If the score makes the hi-score table the game goes to Name Entry, otherwise to
+Game Over.
+
 ## Collision layers
 
 Named in Project Settings → Layer Names → 3D Physics, and listed in
@@ -195,6 +222,8 @@ uses them. Connect to them to add effects.
 | Every enemy and boss | `fx_spawn_started`, `fx_activated`, `fx_hit`, `fx_defeated`, `fx_shot_fired` |
 | EnemyBullet | `fx_hit_wall`, `fx_hit_player`, `fx_expired` |
 | Flag | `fx_touched`, `fx_restored` |
+| InGame | `fx_you_died_shown`, `fx_continue_available` |
+| Name Entry screen | `fx_cursor_moved`, `fx_character_added`, `fx_character_removed`, `fx_press_refused`, `fx_name_saved` |
 
 To react to every enemy, connect to the EnemySpawner's `enemy_spawned(enemy)`
 signal (a game logic signal) and connect to the new enemy's `fx_` signals there.

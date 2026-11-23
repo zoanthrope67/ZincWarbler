@@ -45,6 +45,17 @@ var previous_state: State = State.BOOTSTRAP
 ## The message shown on the Error screen. Set by raise_error().
 var error_message: String = ""
 
+# --- Result of the last game ------------------------------------------------------
+# Set by end_game() and read by the Name Entry and Game Over screens.
+
+## Final score of the last game.
+var last_score := 0
+## Whole seconds the player survived in the last game.
+var last_seconds_survived := 0
+## When the last game ended (the moment the player died), from
+## Time.get_datetime_string_from_system(), in the player's local time.
+var last_datetime := ""
+
 
 ## Called once by the Bootstrap scene. Sets both states to Bootstrap.
 func enter_bootstrap() -> void:
@@ -85,6 +96,18 @@ func raise_error(message: String) -> void:
 	current_state = State.ERROR
 	get_tree().change_scene_to_file(STATE_SCENES[State.ERROR])
 	state_changed.emit(previous_state, current_state)
+
+
+## Called by the In Game scene when a game is over. Stores the result, then goes
+## to Name Entry if the score makes the hi-score table, or to Game Over if not.
+func end_game(score: int, seconds_survived: int, datetime: String) -> void:
+	last_score = score
+	last_seconds_survived = seconds_survived
+	last_datetime = datetime
+	if Hiscores.qualifies(score, seconds_survived):
+		change_state(State.NAME_ENTRY)
+	else:
+		change_state(State.GAME_OVER)
 
 
 ## Closes the game.

@@ -19,7 +19,7 @@ func _ready() -> void:
 		_add_cell(str(rank))
 		_add_cell(entry.name)
 		_add_cell(str(entry.score))
-		_add_cell(_format_time(entry.seconds_survived))
+		_add_cell(TextFormat.time(entry.seconds_survived))
 		_add_cell(entry.datetime.replace("T", " "))
 		rank += 1
 
@@ -36,8 +36,3 @@ func _add_cell(text: String, color := Color.WHITE) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", color)
 	_table.add_child(label)
-
-
-# Shows seconds as minutes:seconds, e.g. 125 -> "2:05".
-func _format_time(total_seconds: int) -> String:
-	return "%d:%02d" % [floori(total_seconds / 60.0), total_seconds % 60]
