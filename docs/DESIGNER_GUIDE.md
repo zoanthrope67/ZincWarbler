@@ -145,7 +145,8 @@ Helpers you can use: `direction_to_target()`, `get_target_position()`,
 `move_and_slide()`) and `is_pushing_into_player(direction)` (skip moving when
 already pressed against the player). See the Tank script for an example.
 Then use the scene in a wave in the spawner's bags, or add it to the flag
-loop's boss list (both below).
+loop's boss list (both below). The full step-by-step guide, with a worked
+example and recipes, is `docs/ENEMIES.md`.
 
 ## Enemy bullets (`scripts/game/enemy/enemy_bullet.gd`, `scripts/game/enemy/enemy_bullet_pool.gd`)
 
