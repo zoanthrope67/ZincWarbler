@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/game/angry_greg.gd" id="1_3hnhp"]
+[ext_resource type="Script" uid="uid://b1ebd54r60j5x" path="res://scripts/game/enemy/angry_greg.gd" id="1_3hnhp"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_l6t3i"]
 radius = 2.0

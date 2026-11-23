@@ -29,19 +29,22 @@ var _flags: Array[Flag] = []
 var _player: Player
 var _spawner: EnemySpawner
 var _last_touched_flag: Flag = null
+var _game: InGame
 
 
 ## Connects the loop to the game. Called by the In Game scene.
-func setup(arena: Arena, player: Player, spawner: EnemySpawner) -> void:
+func setup(game: InGame, arena: Arena, player: Player, spawner: EnemySpawner) -> void:
 	_player = player
 	_spawner = spawner
 	_flags = arena.get_flags()
+	_game = game;
 	for flag in _flags:
 		flag.touched.connect(_on_flag_touched)
 
 
 func _on_flag_touched(flag: Flag) -> void:
 	score_awarded.emit(FLAG_SCORE)
+	_game.increase_danger(10)
 	_last_touched_flag = flag
 	if _flags.all(func(f: Flag) -> bool: return not f.is_active):
 		_spawn_boss()

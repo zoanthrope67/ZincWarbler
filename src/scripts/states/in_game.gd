@@ -44,6 +44,10 @@ var time_survived := 0.0
 var score := 0
 ## Seconds since the player died, or -1 while they are alive.
 var time_since_death := -1.0
+## Current Danger Level. As Danger increases, more powerful enemy bags are used.
+## Danger currently increase by 1 every second. Later feutres will add more ways
+# to increase Danger
+var danger_level := 0.0
 
 # Fixed at the moment the player dies.
 var _seconds_survived_at_death := 0
@@ -73,9 +77,9 @@ func _ready() -> void:
 	_player.place_at(_arena.get_player_spawn_points().pick_random().global_position)
 	_player.died.connect(_on_player_died)
 
-	_spawner.setup(_arena, _player, _enemies, _enemy_bullets)
+	_spawner.setup(self, _arena, _player, _enemies, _enemy_bullets)
 	_spawner.enemy_spawned.connect(_on_enemy_spawned)
-	_flag_loop.setup(_arena, _player, _spawner)
+	_flag_loop.setup(self, _arena, _player, _spawner)
 	_flag_loop.score_awarded.connect(add_score)
 
 	_camera.target = _player
@@ -85,11 +89,15 @@ func _ready() -> void:
 	_player.health_changed.connect(_hud.set_health)
 	score_changed.connect(_hud.set_score)
 
+func increase_danger(danger_delta: float) -> void:
+	danger_level += danger_delta;
 
 func _physics_process(delta: float) -> void:
+		
 	if not _player.is_dead:
 		time_survived += delta
 		_hud.set_time(time_survived)
+		increase_danger(delta);
 		return
 
 	if time_since_death < 0.0:

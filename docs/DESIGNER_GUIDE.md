@@ -165,6 +165,10 @@ Select the EnemySpawner node and change these in the Inspector:
 | `Retry Delay` | Wait before trying again when no spawn point is usable (0.25) |
 | `Enemy Scenes` | The enemies that can appear, equal chance each. Add a scene twice to make it twice as common |
 
+For your own spawning logic (such as waves), `get_time_survived()` in
+`scripts/game/enemy_spawner.gd` returns the seconds the player has survived. It
+counts game time only (not while paused) and stops when the player dies.
+
 ## Flags and bosses (`FlagLoop` node in `scn/in_game.tscn`)
 
 | Setting | What it does |

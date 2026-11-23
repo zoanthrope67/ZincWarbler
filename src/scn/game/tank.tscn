@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/game/tank.gd" id="1_80exi"]
+[ext_resource type="Script" uid="uid://klweqit8g5vd" path="res://scripts/game/enemy/tank.gd" id="1_80exi"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_4k51u"]
 radius = 1.0
