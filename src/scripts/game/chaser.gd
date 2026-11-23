@@ -30,6 +30,11 @@ func _on_activated() -> void:
 
 
 func _active_physics_process(delta: float) -> void:
+	# Pressed against the player and heading into them: it cannot get any
+	# closer, so skip the move (it still faces and hurts the player).
+	if is_pushing_into_player(heading):
+		face(heading)
+		return
 	var collision := move_and_collide(heading * SPEED * delta)
 	if collision != null and is_wall(collision):
 		if has_clear_path_to_target(collision.get_normal()):

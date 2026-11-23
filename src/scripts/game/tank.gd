@@ -20,8 +20,9 @@ func _on_activated() -> void:
 
 func _active_physics_process(delta: float) -> void:
 	var direction := direction_to_target()
-	velocity = direction * SPEED
-	move_and_slide()
+	# Once pressed against the player there is nowhere further to go.
+	if not is_pushing_into_player(direction):
+		move_sliding(direction * SPEED * delta)
 	face(direction)
 
 	_time_until_shot -= delta

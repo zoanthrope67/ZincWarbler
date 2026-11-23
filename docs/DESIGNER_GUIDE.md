@@ -139,7 +139,10 @@ Enemies block the player but pass through each other.
 starts with `extends Enemy`, and fill in `_on_activated()` (runs once, when the
 fade-in ends) and `_active_physics_process(delta)` (runs every frame after that).
 Helpers you can use: `direction_to_target()`, `get_target_position()`,
-`shoot_at_target(speed)`, `face(direction)` and `is_wall(collision)`.
+`shoot_at_target(speed)`, `face(direction)`, `is_wall(collision)`,
+`move_sliding(motion)` (move and glide along walls; cheaper than Godot's
+`move_and_slide()`) and `is_pushing_into_player(direction)` (skip moving when
+already pressed against the player). See the Tank script for an example.
 Then add the scene to the spawner's or the flag loop's list (below).
 
 ## Enemy bullets (`scripts/game/enemy_bullet.gd`, `scripts/game/enemy_bullet_pool.gd`)

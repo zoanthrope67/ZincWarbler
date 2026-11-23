@@ -12,7 +12,9 @@ extends CharacterBody3D
 ##
 ## To make a new enemy: make a scene like scn/game/chaser.tscn, and a script that
 ## extends Enemy and overrides _on_activated() and/or _active_physics_process().
-## Use shoot_at_target() to fire an enemy bullet at the player.
+## Use shoot_at_target() to fire an enemy bullet at the player, move_sliding() to
+## move while gliding along walls, and is_pushing_into_player() to skip moving
+## when already pressed against the player.
 ##
 ## Required child nodes:
 ##   CollisionShape3D - a SphereShape3D (its radius is the enemy's size)
@@ -35,6 +37,9 @@ signal defeated(enemy: Enemy)
 const FADE_IN_SECONDS := 0.25
 ## How far from its edge an enemy's bullets appear, in meters.
 const BULLET_SPAWN_GAP := 0.3
+## How far (meters) an enemy may drift above or below the gameplay plane before
+## it is moved back onto it.
+const PLANE_TOLERANCE := 0.001
 
 ## Player bullet hits needed to defeat this enemy.
 @export var max_hits := 2
@@ -51,6 +56,8 @@ var bullet_pool: EnemyBulletPool = null
 
 var hits_left := 0
 var is_active := false
+## True if the player was inside this enemy's Hurtbox on the last physics frame.
+var touching_player := false
 ## The enemy's radius in meters, read from its CollisionShape3D.
 var body_radius := 1.0
 
@@ -92,7 +99,11 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_active_physics_process(delta)
-	global_position.y = Gameplay.PLANE_HEIGHT
+	# A collision can nudge an enemy slightly off the gameplay plane. Only put it
+	# back when that has happened: moving a physics body is not free, and doing it
+	# every frame for every enemy adds up when there are hundreds of them.
+	if absf(global_position.y - Gameplay.PLANE_HEIGHT) > PLANE_TOLERANCE:
+		global_position.y = Gameplay.PLANE_HEIGHT
 	_hurt_player_if_touching()
 
 
@@ -153,6 +164,37 @@ func face(direction: Vector3) -> void:
 	_model.look_at(_model.global_position + direction, Vector3.UP, true)
 
 
+## Moves by `motion` (meters, on the gameplay plane). If something is in the way,
+## the rest of the motion slides along its surface, so enemies glide along walls
+## instead of stopping dead. Returns the first collision, or null.
+##
+## This does one slide step, which is much cheaper than Godot's move_and_slide()
+## (up to four steps plus extra checks). With hundreds of enemies that matters.
+func move_sliding(motion: Vector3) -> KinematicCollision3D:
+	var collision := move_and_collide(motion)
+	if collision != null:
+		var normal := collision.get_normal()
+		normal.y = 0.0
+		if normal != Vector3.ZERO:
+			var rest := collision.get_remainder().slide(normal.normalized())
+			rest.y = 0.0
+			if rest.length_squared() > 0.000001:
+				move_and_collide(rest)
+	return collision
+
+
+## True if moving along `direction` would only push further into the player
+## this enemy is already touching. Enemies skip their movement then: they cannot
+## get any closer, and skipping it saves physics time when many enemies crowd
+## the player. Moving away from the player is never skipped.
+func is_pushing_into_player(direction: Vector3) -> bool:
+	if not touching_player or direction == Vector3.ZERO:
+		return false
+	var to_player := get_target_position() - global_position
+	to_player.y = 0.0
+	return direction.dot(to_player) > 0.0
+
+
 ## True if a collision was with a wall.
 func is_wall(collision: KinematicCollision3D) -> bool:
 	var layer := PhysicsServer3D.body_get_collision_layer(collision.get_collider_rid())
@@ -175,8 +217,10 @@ func _activate() -> void:
 # Touching the player hurts them. The player's invulnerability after a hit stops
 # this from removing health every frame.
 func _hurt_player_if_touching() -> void:
+	touching_player = false
 	for body in _hurtbox.get_overlapping_bodies():
 		if body is Player:
+			touching_player = true
 			body.take_damage()
 
 
