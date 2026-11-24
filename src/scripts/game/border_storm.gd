@@ -20,9 +20,11 @@ extends Node3D
 ##
 ## All distances are measured flat, on X and Z only.
 ##
-## Looks: the StormOverlay child draws the dark storm and the red ring with the
-## shader gfx/shaders/border_storm.gdshader. Its colours and sizes are the
-## Inspector settings below.
+## Looks: the StormOverlay child draws the storm (the scene under it turned
+## grey, with TV static over it) with the shader gfx/shaders/border_storm.gdshader.
+## It has a hard edge exactly where the storm starts to hurt the player.
+## The alpha is the Inspector setting below; the static's own settings are on
+## the shader (see docs/DESIGNER_GUIDE.md, BorderStorm).
 
 # --- FX signals (effects and sounds only; never used for game logic) -------
 ## The player has gone outside the circle, into the storm.
@@ -51,16 +53,9 @@ const MIN_RADIUS := 0.01
 @export var storm_movement_speed := 0.5
 
 @export_group("Looks")
-## How see-through the storm is: 0 is invisible, 1 hides everything under it.
+## How strong the static is over the greyscale scene: 0 shows only the grey
+## scene, 1 hides it under the static.
 @export_range(0.0, 1.0) var storm_alpha := 0.6
-## Colour of the storm.
-@export var storm_color := Color(0.08, 0.06, 0.12)
-## Colour of the ring drawn on the border.
-@export var ring_color := Color(0.5, 0.1, 0.1)
-## Width of the ring in meters.
-@export var ring_width := 0.1
-## How quickly the storm clouds drift. 0 stops them.
-@export var cloud_speed := 1.0
 
 ## True while the player is in the storm (outside the circle).
 var player_in_storm := false
@@ -184,16 +179,12 @@ func _update_looks() -> void:
 	else:
 		_overlay.global_position = Vector3(global_position.x, Gameplay.PLANE_HEIGHT, global_position.z)
 
-	# Blend between physics frames so the ring moves smoothly on fast screens.
+	# Blend between physics frames so the edge moves smoothly on fast screens.
 	var centre := get_global_transform_interpolated().origin
 	var radius := lerpf(_previous_radius, current_radius, Engine.get_physics_interpolation_fraction())
 	_material.set_shader_parameter(&"centre", Vector2(centre.x, centre.z))
 	_material.set_shader_parameter(&"radius", radius)
 	_material.set_shader_parameter(&"storm_alpha", storm_alpha)
-	_material.set_shader_parameter(&"storm_color", storm_color)
-	_material.set_shader_parameter(&"ring_color", ring_color)
-	_material.set_shader_parameter(&"ring_width", ring_width)
-	_material.set_shader_parameter(&"cloud_speed", cloud_speed)
 
 
 func _flat_distance(a: Vector3, b: Vector3) -> float:

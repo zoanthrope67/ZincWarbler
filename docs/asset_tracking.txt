@@ -68,11 +68,11 @@ src/scn/game/arena.tscn -> Walls (GridMap cell layout), spawn points and flags
     redesigned by the game designer. The outer ring of walls was removed for
     the BorderStorm; only the inner walls remain.
 
-src/scn/game/border_storm.tscn -> StormOverlay (PlaneMesh, ShaderMaterial, NoiseTexture2D)
+src/scn/game/border_storm.tscn -> StormOverlay (PlaneMesh, ShaderMaterial)
 src/gfx/shaders/border_storm.gdshader
-    The look of the BorderStorm: a dark purple tint with drifting clouds made
-    from Godot's generated noise (NoiseTexture2D), and a plain red ring on the
-    border. Replace the look as needed; the shader's uniforms are set from
+    The look of the BorderStorm: everything outside the circle in greyscale with
+    TV static (white noise) over it, and a hard edge at the radius. Replace the
+    look as needed; the circle and alpha uniforms are set from
     scripts/game/border_storm.gd.
 
 src/scn/ui/health_pip.tscn -> PlaceholderFrame, PlaceholderFill, AnimationPlayer

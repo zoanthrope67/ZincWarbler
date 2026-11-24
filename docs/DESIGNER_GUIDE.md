@@ -138,9 +138,7 @@ Select `BorderStorm` in `scn/game/arena.tscn` and change these in the Inspector:
 | `Target Radius` | The radius the circle grows or shrinks towards. Lower it for a time limit |
 | `Radius Grow Speed`, `Radius Shrink Speed` | Meters per second the radius changes when growing / shrinking |
 | `Storm Movement Speed` | Meters per second the circle moves towards its target |
-| `Storm Alpha` | How see-through the storm is (0.5) |
-| `Storm Color`, `Ring Color`, `Ring Width` | The storm's colour, the border ring's colour and width in meters |
-| `Cloud Speed` | How fast the storm clouds drift (0 stops them) |
+| `Storm Alpha` | How strong the static is over the greyscale scene: 0 shows only the grey scene, 1 only static |
 
 | Constant (`scripts/game/border_storm.gd`) | What it does |
 |---|---|
@@ -152,15 +150,16 @@ From code, change `current_radius` or `target_radius` on the BorderStorm (e.g.
 whether a point is in the storm.
 
 **Look:** the `StormOverlay` child is one large plane, kept under the camera,
-drawn on top of everything with `gfx/shaders/border_storm.gdshader`.
-- Cloud size, cloud strength and the soft edge of the storm are shader settings.
-  Open `scn/game/border_storm.tscn`, select `StormOverlay` and look under
-  **Mesh > Material > Shader Parameters**.
-- The cloud texture is the `NoiseTexture2D` in the same place.
+drawn on top of everything with `gfx/shaders/border_storm.gdshader`. Outside the
+circle it turns everything under it grey and mixes TV static over it. Its edge
+is hard and exactly at the radius, where the storm starts to hurt the player.
+- The static's settings are on the shader. Open `scn/game/border_storm.tscn`,
+  select `StormOverlay` and look under **Mesh > Material > Shader Parameters**:
+  `Static Size` (screen pixels per dot), `Static Fps` (how often it changes per
+  second) and `Static Min` / `Static Max` (darkest and brightest dots, 0 to 1).
 - The overlay is hidden in the editor and shown when the game runs.
-
-Raise `Storm Alpha` or change `Storm Color` to make the storm stand out more
-against the floor.
+- To make the grey work it reads the screen (Godot copies the screen once per
+  frame for it). This is a small, fixed cost.
 
 ## The player (`scripts/game/player.gd`)
 

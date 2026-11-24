@@ -41,4 +41,4 @@ script = ExtResource("4_ccgki")
 
 [node name="HUD" parent="." unique_id=973611704 instance=ExtResource("11_hud")]
 
-[node name="PauseMenu" parent="." instance=ExtResource("12_pause")]
+[node name="PauseMenu" parent="." unique_id=85587234 instance=ExtResource("12_pause")]
