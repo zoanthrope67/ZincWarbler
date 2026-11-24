@@ -305,8 +305,19 @@ Select the Camera node and change these in the Inspector:
 
 | Setting | What it does |
 |---|---|
-| `View Height Meters` | Meters of the arena visible from the top to the bottom of the screen (40) |
+| `View Height Meters` | Meters of the arena visible from the top to the bottom of the screen when looking straight down (40) |
 | `Field Of View Degrees` | Lower is flatter, with less perspective (50) |
+| `Tilt Degrees` | How far the camera leans back from straight down (0). The player stays in the middle of the screen. Above about 40 the floor can be cut off at the top of the screen (the camera's `Far`, 200 m) |
+| `Turn Degrees` | Swings the camera around the player (0). Positive turns the arena clockwise on screen; at 90 the arena's right side is at the bottom. The controls do **not** turn with it |
+
+With `Turn Degrees` at 0, Up moves the player towards the top of the screen.
+With any other turn, Up still moves the player along the arena's -Z, so the
+controls will feel rotated. To try angles while the game runs: run the game,
+then in the editor's Scene dock choose **Remote**, select `Camera` and change
+`Tilt Degrees` and `Turn Degrees`. Remote changes are lost when the game
+stops; set the values on the Camera node in `scn/in_game.tscn` to keep them. With a tilt, tall walls can
+hide things behind them, and enemies may appear in view at the top of the
+screen (see `min_spawn_distance` on the EnemySpawner).
 
 ## HUD (`scn/ui/hud.tscn`) and health pips (`scn/ui/health_pip.tscn`)
 
