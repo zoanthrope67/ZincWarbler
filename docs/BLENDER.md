@@ -37,14 +37,10 @@ The camera looks down on the dark part of the sky, so a very metallic, shiny
 material (Metallic near 1, low Roughness) mostly reflects dark blue. For the
 model's own colour to show, keep Metallic low (0 to 0.3) and Roughness around 0.4.
 
-**Palette textures** must not be compressed by Godot:
-1. Select the PNG in the FileSystem dock.
-2. In the **Import** dock, set **Compress > Mode** to **Lossless** and turn off
-   **Mipmaps > Generate**.
-3. Click **Reimport**.
-
-Godot's default compression blends neighbouring pixels, so palette colours come
-out wrong (for example, orange turning grey-green).
+**Palette textures** must not be compressed by Godot. Godot's default
+compression blends neighbouring pixels, so palette colours come out wrong (for
+example, orange turning grey-green). The import setting in
+[section 6](#6-put-it-in-the-game-godot) avoids this.
 
 ---
 
@@ -147,6 +143,8 @@ For more detail, such as markings or a face:
    instead of Open. Make the image **256 x 256** or smaller.
 3. Paint in the **Texture Paint** workspace. When finished, save the image:
    **Image > Save As** in the image editor. It is lost otherwise.
+4. Painted textures need different import settings in Godot from palettes.
+   See "Palette textures vs painted textures" in section 6.
 
 ### Material rules (both ways)
 
@@ -191,10 +189,83 @@ For more detail, such as markings or a face:
 
 ### Import
 
-1. Switch to the Godot editor. It notices the new `.glb` and imports it.
-   - The texture is extracted next to it as a PNG named
-     `<glb name>_<image name>.png`. Commit that file along with the `.glb`.
-   - The default import settings are fine.
+Switch to the Godot editor. It notices the new `.glb` and imports it.
+
+**The texture should stay inside the model, uncompressed.** This is the
+**GLTF > Embedded Image Handling** import setting, and it should be
+**Embed as Uncompressed**.
+- The texture then stays inside the `.glb` with its exact colours, and no
+  extra PNG file is made.
+- Godot's own default, **Extract Textures**, instead writes the texture next to
+  the model as `<glb name>_<image name>.png` and compresses it, which ruins
+  palette colours.
+
+**Make Embed as Uncompressed the default (once per project).** Afterwards,
+every new `.glb` uses it automatically.
+
+1. In the FileSystem dock, select a model that already uses it, e.g.
+   `gfx/models/buzzsaw.glb`. Check in the **Import** dock that
+   **GLTF > Embedded Image Handling** says **Embed as Uncompressed**.
+2. At the top of the Import dock, click **Preset** and choose
+   **Set as Default for 'Scene'**.
+
+Godot saves this in `project.godot` under `[importer_defaults]`; commit that
+file. The default applies to models imported **after** it is set. Models
+already in the project keep their own settings.
+
+Another way to set it: **Project > Project Settings > Import Defaults** tab.
+Choose the **Scene** importer and set **GLTF > Embedded Image Handling** there.
+
+**Check each new model:** select the `.glb` and look at
+**GLTF > Embedded Image Handling** in the Import dock. If it says anything other
+than Embed as Uncompressed (e.g. it was imported before the default was set):
+1. Set it to **Embed as Uncompressed** and click **Reimport**.
+2. Delete the extracted `<glb name>_<image name>.png` and its `.import` file;
+   nothing uses them any more.
+
+If a model is left on Extract Textures, don't rename or delete its extracted
+PNG: the model needs that exact file and shows no texture without it.
+
+#### Palette textures vs painted textures
+
+Embed as Uncompressed suits **palette textures** (section 4A), which are tiny
+and have one flat colour per face. It is a poor choice for **detailed painted
+textures** (section 4B):
+
+- **Video memory.** Uncompressed textures take about 4 bytes per pixel. Godot's
+  VRAM Compressed takes 0.5 to 1 byte per pixel, and stays compressed on the
+  graphics card. Low spec machines have little video memory.
+
+  | Texture | Uncompressed | VRAM Compressed |
+  |---|---|---|
+  | 16 x 8 palette | about 0.5 KB | about 0.1 KB |
+  | 1024 x 1024 painted | about 4 MB (5.3 MB with mipmaps) | about 0.5 to 1 MB |
+  | 2048 x 2048 painted | about 16 MB (21 MB with mipmaps) | about 2 to 4 MB |
+
+- **No mipmaps.** Mipmaps are smaller copies the graphics card uses when a
+  texture is drawn small, and embedded textures don't get them. With a top-down
+  camera a 2 m enemy is only about 50 pixels tall, so a detailed texture without
+  mipmaps flickers and sparkles as it moves. Palettes are unaffected because
+  each face is one flat colour.
+- **Less control.** An embedded texture has no import settings of its own, and
+  every model carries its own copy.
+
+VRAM compression works on 4 x 4 blocks of pixels and keeps only a couple of
+colours per block. That is fine for painted textures, where neighbouring pixels
+are similar, and is why it ruins palettes, where every pixel is a different
+colour.
+
+**For a model with a detailed painted texture:**
+1. Select the `.glb`. In the Import dock, set **Embedded Image Handling** to
+   **Extract Textures** for that model only, and click **Reimport**. The project
+   default only sets the starting value, so changing one model is fine.
+2. Select the extracted PNG and leave **Compress > Mode** on **VRAM Compressed**.
+   Turn on **High Quality** for better colour (1 byte per pixel).
+3. Keep **Mipmaps > Generate** on.
+4. Commit the extracted PNG and its `.import` file, and don't rename them.
+
+**Embed as Basis Universal** (the other embed option) also compresses, so it has
+the same problem with palettes. It is not worth using here.
 
 ### Replace an enemy's placeholder
 
@@ -362,7 +433,7 @@ $Model/chaser/AnimationPlayer.play("spin")   # the path depends on your node nam
 
 | File | Where | Notes |
 |---|---|---|
-| `.glb` and its extracted PNG | `src/assets/handmade/models/<name>/`, e.g. `src/assets/handmade/models/chaser/chaser.glb` | Inside the Godot project, so the game can use them |
+| `.glb` (texture stored inside it) and its `.import` file | `src/assets/handmade/models/<name>/`, e.g. `src/assets/handmade/models/chaser/chaser.glb` | Inside the Godot project, so the game can use them |
 | `.blend` and source PNGs | Outside `src/`, e.g. a top-level `art/models/` folder | Godot tries to import `.blend` files it finds in the project, which needs Blender on every machine that opens it. Exporting `.glb` avoids that |
 | `.blend1` backups | Not in git | Blender writes these on every save. Consider adding `*.blend1` to `.gitignore` |
 
@@ -386,6 +457,7 @@ designer's permission (see CLAUDE.md).
 - [ ] Animated parts: origin on the pivot, parented to the body, keys set to Linear for steady motion, `-loop` on looping action names
 - [ ] Animation exported with Animation and Set All glTF Animation Starting at 0 on; in Godot, autoplay set (or played from code) with Callback Mode Process on Physics
 - [ ] Exported as `.glb` with Selected Objects, +Y Up and Apply Modifiers
+- [ ] In Godot: palette models use **Embed as Uncompressed** with no extracted PNG next to the `.glb`. Painted-texture models use **Extract Textures**, VRAM Compressed and mipmaps
 - [ ] In Godot: placeholder removed, model under **Model**, blue Z arrow points forward
 - [ ] Hitbox radii updated if the size changed
 - [ ] Player only: dash and RESET tracks point at the new model
