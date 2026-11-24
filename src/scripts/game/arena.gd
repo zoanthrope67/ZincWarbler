@@ -1,14 +1,17 @@
 class_name Arena
 extends Node3D
-## The arena: walls, spawn points and flags.
+## The arena: walls, spawn points, flags and the BorderStorm.
 ##
 ## How to edit the arena (open scn/game/arena.tscn):
 ##   Walls             - the GridMap. Select it and paint wall tiles in the GridMap
 ##                       panel at the bottom of the editor. Each cell is 4 x 4 m and 4 m tall.
 ##   PlayerSpawnPoints - add Marker3D children. The player starts on one at random.
-##   EnemySpawnPoints  - add Marker3D children. Enemies appear on these (phase 3).
+##   EnemySpawnPoints  - add Marker3D children. Enemy waves start on these.
 ##   Flags             - add instances of scn/game/flag.tscn. Give each flag one or
 ##                       more Marker3D children: those are its BossSpawnPoints.
+##   BorderStorm       - the circle the player must stay inside (scn/game/border_storm.tscn).
+##                       Move it to where the circle should start. There are no
+##                       outer walls: the storm is the edge of the play area.
 ##
 ## Only the X and Z position of markers matters; height is ignored.
 ## When a game starts, validate() checks the rules from docs/SPEC.md
@@ -28,6 +31,11 @@ func get_player_spawn_points() -> Array[Marker3D]:
 ## Returns all EnemySpawnPoints.
 func get_enemy_spawn_points() -> Array[Marker3D]:
 	return _markers_under(^"EnemySpawnPoints")
+
+
+## Returns the BorderStorm, or null if the arena has none.
+func get_border_storm() -> BorderStorm:
+	return get_node_or_null(^"BorderStorm") as BorderStorm
 
 
 ## Returns all flags.
@@ -61,6 +69,9 @@ func validate() -> PackedStringArray:
 	for flag in flags:
 		if flag.get_boss_spawn_points().is_empty():
 			problems.append("Flag '%s' has no BossSpawnPoint (add a Marker3D as a child of the flag)." % flag.name)
+
+	if get_border_storm() == null:
+		problems.append("The arena needs a BorderStorm (an instance of scn/game/border_storm.tscn named BorderStorm).")
 
 	return problems
 

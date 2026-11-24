@@ -7,13 +7,14 @@ Where to change things in Zinc Warbler. All paths are inside `src/`.
 | Folder | Contents |
 |---|---|
 | `scn/` | Scenes: one per game state, e.g. `main_menu.tscn`, `in_game.tscn` |
-| `scn/game/` | Gameplay scenes: `arena.tscn`, `player.tscn`, `player_bullet.tscn`, `flag.tscn`, `chaser.tscn`, `tank.tscn`, `angry_greg.tscn`, `enemy_bullet.tscn` |
+| `scn/game/` | Gameplay scenes: `arena.tscn`, `player.tscn`, `player_bullet.tscn`, `flag.tscn`, `chaser.tscn`, `tank.tscn`, `angry_greg.tscn`, `enemy_bullet.tscn`, `border_storm.tscn` |
 | `scripts/autoload/` | Global scripts that are always running: `GameState`, `Settings`, `Hiscores` |
 | `scripts/states/` | One script per state screen |
-| `scripts/game/` | Gameplay scripts (player, player bullets, arena, flags, camera) |
+| `scripts/game/` | Gameplay scripts (player, player bullets, arena, flags, camera, BorderStorm) |
 | `scripts/game/enemy/` | Enemies, enemy bullets and their pool, the enemy spawner and `EnemyWave` |
 | `scripts/ui/` | Shared UI pieces (the keyboard/controller menu, the HUD, the pause menu) |
 | `gfx/placeholder/` | Placeholder art, see `docs/asset_tracking.txt` |
+| `gfx/shaders/` | Shaders (the BorderStorm's look) |
 | `gfx/`, `bgm/`, `sfx/` | Final graphics, music and sound effects |
 
 ## Controls
@@ -77,10 +78,11 @@ Saved hi-scores live in `user://hiscores.json`.
 | `PlayerSpawnPoints` | Add `Marker3D` children. The player starts on one at random |
 | `EnemySpawnPoints` | Add `Marker3D` children. Enemy waves start on these (see Enemy spawning) |
 | `Flags` | Add instances of `scn/game/flag.tscn`. Give each flag one or more `Marker3D` children: those are its BossSpawnPoints. Keep them a few meters from the flag |
+| `BorderStorm` | The edge of the play area (see BorderStorm below). Move it to where the circle should start |
 
 Only the X and Z position of markers matters. When a game starts the arena is
-checked (at least 1 PlayerSpawnPoint, 1 EnemySpawnPoint, 2 flags, and a
-BossSpawnPoint on every flag). If anything is missing, the Error screen lists it.
+checked (at least 1 PlayerSpawnPoint, 1 EnemySpawnPoint, 2 flags, a
+BossSpawnPoint on every flag, and a BorderStorm). If anything is missing, the Error screen lists it.
 The minimum counts are constants at the top of `scripts/game/arena.gd`.
 
 The game is played on a flat plane 1 m above the floor (`PLANE_HEIGHT` in
@@ -97,6 +99,52 @@ background, ambient light and reflections.
   small for low spec machines.
 
 `PlaceholderLight` is the sun.
+
+There are no outer walls around the arena: the BorderStorm is the edge of the
+play area. Paint walls only where you want obstacles.
+
+## BorderStorm (`scn/game/border_storm.tscn`, `scripts/game/border_storm.gd`)
+
+A circle the player should stay inside. Everything outside it is the storm.
+- **Movement:** the circle moves towards a random uncollected flag, and picks a
+  new one each time a flag is collected. While a boss is in play it moves
+  towards the boss. It stops when it reaches its target.
+- **Damage:** after 3 seconds in the storm, the player is hurt every time their
+  invulnerability ends. Going back inside resets the timer.
+- **Enemies** are not affected by the storm.
+
+Select `BorderStorm` in `scn/game/arena.tscn` and change these in the Inspector:
+
+| Setting | What it does |
+|---|---|
+| `Current Radius` | Starting radius in meters (changes during play) |
+| `Target Radius` | The radius the circle grows or shrinks towards. Lower it for a time limit |
+| `Radius Grow Speed`, `Radius Shrink Speed` | Meters per second the radius changes when growing / shrinking |
+| `Storm Movement Speed` | Meters per second the circle moves towards its target |
+| `Storm Alpha` | How see-through the storm is (0.5) |
+| `Storm Color`, `Ring Color`, `Ring Width` | The storm's colour, the border ring's colour and width in meters |
+| `Cloud Speed` | How fast the storm clouds drift (0 stops them) |
+
+| Constant (`scripts/game/border_storm.gd`) | What it does |
+|---|---|
+| `DAMAGE_DELAY_SECONDS` | Seconds in the storm before it starts hurting the player (3) |
+| `MIN_RADIUS` | The radius never goes below this (0.01) |
+
+From code, change `current_radius` or `target_radius` on the BorderStorm (e.g.
+`_arena.get_border_storm().target_radius = 20.0`). `is_in_storm(position)` says
+whether a point is in the storm.
+
+**Look:** the `StormOverlay` child is one large plane, kept under the camera,
+drawn on top of everything with `gfx/shaders/border_storm.gdshader`.
+- Cloud size, cloud strength and the soft edge of the storm are shader settings.
+  Open `scn/game/border_storm.tscn`, select `StormOverlay` and look under
+  **Mesh > Material > Shader Parameters**.
+- The cloud texture is the `NoiseTexture2D` in the same place.
+- The overlay is hidden in the editor and shown when the game runs.
+
+Because the sky below the arena is already very dark, the storm is only a
+little darker. It shows mostly through its clouds and the ring. Raise
+`Storm Alpha` or change `Storm Color` to make it stand out more.
 
 ## The player (`scripts/game/player.gd`)
 
@@ -316,6 +364,7 @@ uses them. Connect to them to add effects.
 | EnemyBullet | `fx_hit_wall`, `fx_hit_player`, `fx_expired` |
 | Flag | `fx_touched`, `fx_restored` |
 | InGame | `fx_you_died_shown`, `fx_continue_available` |
+| BorderStorm | `fx_player_entered_storm`, `fx_player_left_storm` |
 | PauseMenu | `fx_pause_menu_entered`, `fx_pause_resume`, `fx_countdown(number)` (3, 2, 1), `fx_pause_restart`, `fx_pause_exit`. These run while the game is paused, so effects connected to them must have their Process Mode set to Always |
 | Name Entry screen | `fx_cursor_moved`, `fx_character_added`, `fx_character_removed`, `fx_press_refused`, `fx_name_saved` |
 

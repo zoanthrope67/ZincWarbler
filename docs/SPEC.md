@@ -6,7 +6,7 @@ An arcade multi-directional shooter in Godot 4.7.2. The game will be rendered in
 
 The menu screens stay centered. The final art style will use 3d models from Blender; this will be handled by a human separately at a later date. For this prototype, simple placeholders of simple shapes must be used which will be replaced later. The expected size of the player's model is 2x2 meters. The player's hitbox should be a sphere.
 
-Gameplay takes place in a single arena. This should be a GridMap of walls which is able to be updated by the game designer via the Godot editor easily. Wall tiles block the player, enemies and all bullets. Each grid should have a 4x4 footprint and be 4 meters tall.
+Gameplay takes place in a single arena. This should be a GridMap of walls which is able to be updated by the game designer via the Godot editor easily. Wall tiles block the player, enemies and all bullets. Each grid should have a 4x4 footprint and be 4 meters tall. The arena has no outer walls blocking the player in: the edge of the play area is the BorderStorm (see BorderStorm). Walls inside the arena are kept.
 
 Godot UI nodes should be used to display the current score, health and time. Health is drawn as a lifebar of animated pips, one per point of health; a pip that is lost plays a short "lose" animation before showing as empty.
 
@@ -51,7 +51,7 @@ The Main Menu contains a title splash image and a keyboard controlled menu. The 
 
 ## In Game State
 
-When in game, the player will enter the arena. The Arena is made up of a GridMap that contains the geometry, multiple flags, multiple PlayerSpawnPoints, multiple EnemySpawnPoints. When the player has no health then the game stays on the In Game screen and shows an animated "YOU DIED" banner over it. The player is hidden and disabled, all player bullets are removed and the score is locked. The time survived and the date and time the game ended are both taken at the moment the player dies. Enemies carry on moving and firing at the player's last known position. This lasts for 90 seconds, or until the player makes a fresh press of Confirm (not one held from before) once 5 seconds have passed. The game then ends. If the player's score makes the hi-score table, the game will change state to Name Entry, otherwise it will change state to a Game Over screen showing the player's score and how long they survived.
+When in game, the player will enter the arena. The Arena is made up of a GridMap that contains the geometry, multiple flags, multiple PlayerSpawnPoints, multiple EnemySpawnPoints and a BorderStorm. When the player has no health then the game stays on the In Game screen and shows an animated "YOU DIED" banner over it. The player is hidden and disabled, all player bullets are removed and the score is locked. The time survived and the date and time the game ended are both taken at the moment the player dies. Enemies carry on moving and firing at the player's last known position. This lasts for 90 seconds, or until the player makes a fresh press of Confirm (not one held from before) once 5 seconds have passed. The game then ends. If the player's score makes the hi-score table, the game will change state to Name Entry, otherwise it will change state to a Game Over screen showing the player's score and how long they survived.
 
 ### Pausing
 
@@ -74,6 +74,7 @@ Arenas must have at least 1 PlayerSpawnPoint
 Arenas must have at least 1 EnemySpawnPoint
 Arenas must have at least 2 flags
 Every flag must have at least 1 BossSpawnPoint
+Arenas must have a BorderStorm
 
 If any of these are breached then an error must be raised and play must be stopped. This must display an error screen.
 
@@ -146,6 +147,20 @@ Enemy bullets are a 0.5 meter purple sphere. A bullet pooling system should be u
 The arena has multiple flags at static positions. When the player touches a flag, they should gain 1 score and 10 Danger, and the flag should be hidden and marked as inactive. Once all flags have been touched, a random Boss enemy should be spawned. Once the boss enemy is defeated, the flags should be restored, with the exception of the one flag that is closest to the player. If the player touches all flags again then a new boss should spawn. Play will continue in this loop until the player is defeated.
 
 Each flag must have its own set of BossSpawnPoints. When a boss is spawned, a random BossSpawnPoint that belongs to the latest touched flag must be used to set the position of the Boss. If any flag in the arena does not have a BossSpawnPoint then the error must be raised and play should be stopped. The human game designer will then fix this manually.
+
+### BorderStorm
+
+Instead of outer walls, the play area is a circle called the BorderStorm. Everything outside the circle is "the storm". All BorderStorm distances are measured flat, on X and Z only.
+
+The centre of the circle is a Node3D that is a child of the Arena. It starts in the middle of the arena, and the game designer can move its starting position. A red ring is drawn on the border, and the area outside the circle is covered by a dark stormy effect. The alpha of this effect can be changed by the game designer and defaults to 0.5.
+
+The circle moves towards a random uncollected flag. Each time a flag is collected, another random uncollected flag is chosen. When a boss is spawned, the circle moves towards the boss instead. After the boss is defeated, it moves towards a random uncollected flag again. When the circle reaches its destination it stays in place. Its movement speed is a constant that the game designer can change.
+
+The circle has a current radius and a target radius. The current radius changes smoothly towards the target radius, using a grow speed when it is getting larger and a shrink speed when it is getting smaller. The current radius, target radius, grow speed and shrink speed are settings the game designer can change, and the radius can also be changed during gameplay. The current radius never goes below 0.01 meters. With the target radius smaller than the starting radius, the storm acts as a soft time limit.
+
+Game objects outside the circle work the same as inside it. Enemies can leave the circle and are not affected by the storm.
+
+If the player stays in the storm for 3 seconds, they lose 1 health every frame for as long as they stay there. The storm respects invulnerability, so in practice the player is hit once each time their invulnerability ends. Going back inside the circle resets the 3 second timer. The FX signals fx_player_entered_storm and fx_player_left_storm are emitted when the player goes into and comes out of the storm.
 
 ### Danger Level
 

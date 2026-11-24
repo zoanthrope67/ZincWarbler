@@ -9,7 +9,7 @@ extends Node3D
 ## scene whose root uses scripts/game/arena.gd.
 ##
 ## Children:
-##   Arena          - walls, spawn points and flags
+##   Arena          - walls, spawn points, flags and the BorderStorm
 ##   Player         - the player
 ##   PlayerBullets  - player bullets are added here
 ##   Enemies        - enemies and bosses are added here
@@ -85,6 +85,7 @@ func _ready() -> void:
 	_spawner.enemy_spawned.connect(_on_enemy_spawned)
 	_flag_loop.setup(self, _arena, _player, _spawner)
 	_flag_loop.score_awarded.connect(add_score)
+	_arena.get_border_storm().setup(_player, _flag_loop, _arena.get_flags())
 
 	_camera.target = _player
 	_camera.snap_to_target()

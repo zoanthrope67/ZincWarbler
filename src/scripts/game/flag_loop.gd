@@ -14,6 +14,11 @@ extends Node
 signal score_awarded(points: int)
 ## Emitted when a boss appears. Game logic signal.
 signal boss_spawned(boss: Enemy)
+## Emitted after the player touches a flag (and after the boss appears, if that
+## flag was the last one). Game logic signal.
+signal flag_collected(flag: Flag)
+## Emitted after a boss is defeated and the flags have come back. Game logic signal.
+signal flags_restored
 
 ## Score for touching one flag.
 const FLAG_SCORE := 1
@@ -48,6 +53,7 @@ func _on_flag_touched(flag: Flag) -> void:
 	_last_touched_flag = flag
 	if _flags.all(func(f: Flag) -> bool: return not f.is_active):
 		_spawn_boss()
+	flag_collected.emit(flag)
 
 
 func _spawn_boss() -> void:
@@ -66,6 +72,7 @@ func _on_boss_defeated(_boss: Enemy) -> void:
 	for flag in _flags:
 		if flag != closest:
 			flag.restore()
+	flags_restored.emit()
 
 
 func _flag_closest_to_player() -> Flag:

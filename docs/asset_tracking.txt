@@ -61,8 +61,16 @@ src/scn/game/arena.tscn -> PlaceholderLight, PlaceholderEnvironment
     was added by the designer, not made by Claude. There is no floor: the
     sky shows below the arena.
 src/scn/game/arena.tscn -> Walls (GridMap cell layout), spawn points and flags
-    A test layout (20 x 15 cells, 80 x 60 m) for prototyping. Expected to be
-    redesigned by the game designer.
+    A test layout (about 80 x 60 m) for prototyping. Expected to be
+    redesigned by the game designer. The outer ring of walls was removed for
+    the BorderStorm; only the inner walls remain.
+
+src/scn/game/border_storm.tscn -> StormOverlay (PlaneMesh, ShaderMaterial, NoiseTexture2D)
+src/gfx/shaders/border_storm.gdshader
+    The look of the BorderStorm: a dark purple tint with drifting clouds made
+    from Godot's generated noise (NoiseTexture2D), and a plain red ring on the
+    border. Replace the look as needed; the shader's uniforms are set from
+    scripts/game/border_storm.gd.
 
 src/scn/ui/health_pip.tscn -> PlaceholderFrame, PlaceholderFill, AnimationPlayer
     Dark square with a red fill. The "lose" animation flashes the fill white,

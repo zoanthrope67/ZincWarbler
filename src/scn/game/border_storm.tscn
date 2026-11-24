@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://d2pa373vunhn5"]
+
+[ext_resource type="Script" uid="uid://vg6fn3omvye0" path="res://scripts/game/border_storm.gd" id="1_storm"]
+[ext_resource type="Shader" uid="uid://d21iqxsm3bowu" path="res://gfx/shaders/border_storm.gdshader" id="2_shader"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_clouds"]
+frequency = 0.02
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_clouds"]
+width = 256
+height = 256
+noise = SubResource("FastNoiseLite_clouds")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_storm"]
+resource_local_to_scene = true
+render_priority = 127
+shader = ExtResource("2_shader")
+shader_parameter/centre = Vector2(0, 0)
+shader_parameter/radius = 100.0
+shader_parameter/storm_alpha = 0.5
+shader_parameter/storm_color = Color(0.08, 0.06, 0.12, 1)
+shader_parameter/ring_color = Color(1, 0.1, 0.1, 1)
+shader_parameter/ring_width = 0.6
+shader_parameter/cloud_speed = 1.0
+shader_parameter/clouds = SubResource("NoiseTexture2D_clouds")
+shader_parameter/cloud_scale = 0.02
+shader_parameter/cloud_strength = 1.0
+shader_parameter/edge_softness = 1.5
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_storm"]
+material = SubResource("ShaderMaterial_storm")
+size = Vector2(1000, 1000)
+
+[node name="BorderStorm" type="Node3D" unique_id=1918972358]
+script = ExtResource("1_storm")
+
+[node name="StormOverlay" type="MeshInstance3D" parent="." unique_id=738973830]
+visible = false
+cast_shadow = 0
+mesh = SubResource("PlaneMesh_storm")
