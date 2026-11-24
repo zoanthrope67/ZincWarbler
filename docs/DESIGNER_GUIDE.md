@@ -79,6 +79,7 @@ Saved hi-scores live in `user://hiscores.json`.
 | `EnemySpawnPoints` | Add `Marker3D` children. Enemy waves start on these (see Enemy spawning) |
 | `Flags` | Add instances of `scn/game/flag.tscn`. Give each flag one or more `Marker3D` children: those are its BossSpawnPoints. Keep them a few meters from the flag |
 | `BorderStorm` | The edge of the play area (see BorderStorm below). Move it to where the circle should start |
+| `PlaceholderFloor` | The floor: a large plane at y = 0 with a dark blue surface and blue grid lines (see Floor below) |
 
 Only the X and Z position of markers matters. When a game starts the arena is
 checked (at least 1 PlayerSpawnPoint, 1 EnemySpawnPoint, 2 flags, a
@@ -87,7 +88,14 @@ The minimum counts are constants at the top of `scripts/game/arena.gd`.
 
 The game is played on a flat plane 1 m above the floor (`PLANE_HEIGHT` in
 `scripts/game/gameplay.gd`). +X is right on screen and -Z is up on screen.
-The floor is not drawn, so the sky shows below the arena.
+
+**Floor:** `PlaceholderFloor` is a 1000 x 1000 m plane drawn with
+`gfx/placeholder/placeholder_cyber_floor.gdshader`. It ignores lighting.
+Select it and open **Mesh > Material > Shader Parameters** to change the base
+colour, line colour, grid size (4 m, matching the wall tiles), line width
+and the pulse that ripples out from the arena's middle (`Pulse Strength` 0
+turns it off). The grid is drawn in world meters, so moving or resizing the
+plane does not move the lines.
 
 **Lighting:** select `PlaceholderEnvironment` and open its Environment in the
 Inspector. It uses the sky image `gfx/sky/autumn_field_puresky_1k.hdr` for the
@@ -142,9 +150,8 @@ drawn on top of everything with `gfx/shaders/border_storm.gdshader`.
 - The cloud texture is the `NoiseTexture2D` in the same place.
 - The overlay is hidden in the editor and shown when the game runs.
 
-Because the sky below the arena is already very dark, the storm is only a
-little darker. It shows mostly through its clouds and the ring. Raise
-`Storm Alpha` or change `Storm Color` to make it stand out more.
+Raise `Storm Alpha` or change `Storm Color` to make the storm stand out more
+against the floor.
 
 ## The player (`scripts/game/player.gd`)
 
