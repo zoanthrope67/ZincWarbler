@@ -48,7 +48,7 @@ const MIN_RADIUS := 0.01
 
 @export_group("Movement")
 ## How fast the circle moves towards its target (a flag or the boss), in meters per second.
-@export var storm_movement_speed := 4.0
+@export var storm_movement_speed := 0.5
 
 @export_group("Looks")
 ## How see-through the storm is: 0 is invisible, 1 hides everything under it.
