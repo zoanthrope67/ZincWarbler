@@ -1,0 +1,26 @@
+The arena should not have walls blocking the player in. Instead, there should be a dynamic BorderStorm. This should be based off the location of a Node3D that is a child of the Arena and begins at the current middle of the arena. The designer should be able to move this position later. New features to be play tested will involve moving the storm. There should be a red circular ring drawn on the border and then the area outside of the BorderStorm should be covered by a dark stormy effect. The exact alpha of this effect should be changeable by the designer and should default to 0.5. Game objects that are outside of the borders all work the same as they would be inside of the borders.
+
+The BorderStorm node should move towards a random uncollected flag. Once a flag is collected then another random uncollected flag should be chosen. This will continue until a boss is spawned, at which point the BorderStorm will move towards the boss instead. After the boss is defeated then the loop will start again with a random uncollected flag. No special case is needed if no boss exists as there will always be a boss. When the BorderStorm reaches it's destination it will remain in place.
+
+Enemies can leave the borders and are not affected. Enemies that are at risk of leaving the play area completely will be redesigned in later change requests and can be ignored for now.
+
+If the player remains in the storm for 3 seconds then they will begin to lose 1 health every frame. (in practice, invulnerabilty on each hit will prevent instant death) If the player enters the storm again, this timer will reset. The storm respects invulnerability and will not damage the player until it is over.
+
+There should be the following @export variables:
+current_radius = 100
+target_radius = 5
+radius_grow_speed = 6
+radius_shrink_speed = 3 # Very quick for testing, will be changed later
+storm_movement_speed = 10 # The storm can move at 10 meters a second towards flags or bosses.
+
+The current_radius will change smoothly every second by radius_grow_speed or radius_shrink_speed, moving towards the target_radius, using grow speed when the storm radius is getting larger and shrink speed when the radius is getting smaller. At a later date, the target_radius might change dynamically based on gameplay but for now this will be static and the storm will be a soft time limit. There should be a hardcoded safely minimum of 0.01 for the current_radius.
+
+# Tech Notes
+
+The distances for gameplay must be measured flat on X and Z only.
+The SPEC should also be updated
+
+# FX Signals
+
+fx_player_entered_storm
+fx_player_left_storm
