@@ -1,27 +1,13 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cxybu66gxe1ti"]
 
 [ext_resource type="Script" uid="uid://d2r8vexft0o1g" path="res://scripts/game/enemy/chaser.gd" id="1_r7i5n"]
+[ext_resource type="PackedScene" uid="uid://cu5oua2hi54tc" path="res://gfx/models/buzzsaw.glb" id="2_t40ou"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_t40ou"]
 radius = 1.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_o1soq"]
 radius = 1.1
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iff4i"]
-albedo_color = Color(0.95, 0.25, 0.25, 1)
-
-[sub_resource type="SphereMesh" id="SphereMesh_eaw6n"]
-material = SubResource("StandardMaterial3D_iff4i")
-radius = 1.0
-height = 2.0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6v76r"]
-albedo_color = Color(0.3, 0.05, 0.05, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_xt378"]
-material = SubResource("StandardMaterial3D_6v76r")
-size = Vector3(0.5, 0.5, 0.8)
 
 [node name="Chaser" type="CharacterBody3D" unique_id=860176819]
 collision_layer = 0
@@ -42,9 +28,4 @@ shape = SubResource("SphereShape3D_o1soq")
 
 [node name="Model" type="Node3D" parent="." unique_id=1563779419]
 
-[node name="PlaceholderBody" type="MeshInstance3D" parent="Model" unique_id=1250947565]
-mesh = SubResource("SphereMesh_eaw6n")
-
-[node name="PlaceholderNose" type="MeshInstance3D" parent="Model" unique_id=53742933]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
-mesh = SubResource("BoxMesh_xt378")
+[node name="buzzsaw" parent="Model" unique_id=1250318789 instance=ExtResource("2_t40ou")]

@@ -29,8 +29,22 @@ about 50 pixels tall on a 1080p screen. Only the **top-down silhouette** and
 **strong colours** read in the game. Check your model in Top view (Numpad 7)
 often, and don't spend triangles on detail underneath or on the sides.
 
-The arena has one directional light with no shadows and flat ambient light, so
-shapes read through colour more than shading.
+The arena has one directional light with no shadows. Ambient light and
+reflections come from the sky image (`gfx/sky/`), so shapes read through colour
+more than shading.
+
+The camera looks down on the dark part of the sky, so a very metallic, shiny
+material (Metallic near 1, low Roughness) mostly reflects dark blue. For the
+model's own colour to show, keep Metallic low (0 to 0.3) and Roughness around 0.4.
+
+**Palette textures** must not be compressed by Godot:
+1. Select the PNG in the FileSystem dock.
+2. In the **Import** dock, set **Compress > Mode** to **Lossless** and turn off
+   **Mipmaps > Generate**.
+3. Click **Reimport**.
+
+Godot's default compression blends neighbouring pixels, so palette colours come
+out wrong (for example, orange turning grey-green).
 
 ---
 

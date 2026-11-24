@@ -3,20 +3,20 @@
 [ext_resource type="Script" uid="uid://jg3y1yn0fiob" path="res://scripts/game/arena.gd" id="1_canl7"]
 [ext_resource type="MeshLibrary" uid="uid://bc1vvx05jx71l" path="res://gfx/placeholder/placeholder_wall_library.tres" id="2_6wbug"]
 [ext_resource type="PackedScene" path="res://scn/game/flag.tscn" id="3_bb2n5"]
+[ext_resource type="Texture2D" path="res://gfx/sky/autumn_field_puresky_1k.hdr" id="4_sky"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2nalq"]
-albedo_color = Color(0.16, 0.17, 0.2, 1)
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_sky"]
+panorama = ExtResource("4_sky")
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_qqyol"]
-material = SubResource("StandardMaterial3D_2nalq")
-size = Vector2(80, 60)
+[sub_resource type="Sky" id="Sky_autumn"]
+sky_material = SubResource("PanoramaSkyMaterial_sky")
+radiance_size = 2
 
 [sub_resource type="Environment" id="Environment_lyvdg"]
-background_mode = 1
-background_color = Color(0.06, 0.06, 0.09, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.6, 0.62, 0.7, 1)
-ambient_light_energy = 0.6
+background_mode = 2
+sky = SubResource("Sky_autumn")
+ambient_light_source = 3
+reflected_light_source = 2
 
 [node name="Arena" type="Node3D" unique_id=578881515]
 script = ExtResource("1_canl7")
@@ -28,10 +28,6 @@ collision_mask = 0
 data = {
 "cells": PackedInt32Array(0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8, 0, 0, 9, 0, 0, 10, 0, 0, 11, 0, 0, 12, 0, 0, 13, 0, 0, 14, 0, 0, 15, 0, 0, 16, 0, 0, 17, 0, 0, 18, 0, 0, 19, 0, 0, 0, 1, 0, 19, 1, 0, 0, 2, 0, 19, 2, 0, 0, 3, 0, 4, 3, 0, 5, 3, 0, 14, 3, 0, 15, 3, 0, 19, 3, 0, 0, 4, 0, 4, 4, 0, 15, 4, 0, 19, 4, 0, 0, 5, 0, 19, 5, 0, 0, 6, 0, 8, 6, 0, 11, 6, 0, 19, 6, 0, 0, 7, 0, 19, 7, 0, 0, 8, 0, 8, 8, 0, 11, 8, 0, 19, 8, 0, 0, 9, 0, 19, 9, 0, 0, 10, 0, 4, 10, 0, 15, 10, 0, 19, 10, 0, 0, 11, 0, 4, 11, 0, 5, 11, 0, 14, 11, 0, 15, 11, 0, 19, 11, 0, 0, 12, 0, 19, 12, 0, 0, 13, 0, 19, 13, 0, 0, 14, 0, 1, 14, 0, 2, 14, 0, 3, 14, 0, 4, 14, 0, 5, 14, 0, 6, 14, 0, 7, 14, 0, 8, 14, 0, 9, 14, 0, 10, 14, 0, 11, 14, 0, 12, 14, 0, 13, 14, 0, 14, 14, 0, 15, 14, 0, 16, 14, 0, 17, 14, 0, 18, 14, 0, 19, 14, 0, 3, 7, 0, 4, 7, 0, 5, 7, 0, 15, 5, 0, 15, 6, 0, 15, 7, 0, 15, 8, 0, 15, 9, 0)
 }
-
-[node name="PlaceholderFloor" type="MeshInstance3D" parent="." unique_id=111339474]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 30)
-mesh = SubResource("PlaneMesh_qqyol")
 
 [node name="PlaceholderLight" type="DirectionalLight3D" parent="." unique_id=2031214881]
 transform = Transform3D(0.8660254, 0.43301272, -0.24999999, 0, 0.49999997, 0.86602545, 0.5, -0.75, 0.43301266, 0, 0, 0)

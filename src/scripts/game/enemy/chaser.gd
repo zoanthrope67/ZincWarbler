@@ -10,7 +10,7 @@ extends Enemy
 ## Running into the player does not change its heading; it just pushes against them.
 
 ## Movement speed in meters per second.
-const SPEED := 2.0
+const SPEED := 16.0
 ## How far the path check starts back from the wall it hit, in meters. A sweep
 ## that starts touching a wall can report "blocked" straight away.
 const PATH_CHECK_BACKOFF := 0.05

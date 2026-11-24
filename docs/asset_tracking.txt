@@ -44,9 +44,6 @@ src/scn/game/flag.tscn -> PlaceholderPole, PlaceholderBanner
 src/scn/game/enemy_bullet.tscn -> PlaceholderMesh
     Purple unshaded 0.5 m sphere.
 
-src/scn/game/chaser.tscn -> Model/PlaceholderBody, Model/PlaceholderNose
-    Red 2 m sphere with a dark box on its front (+Z).
-
 src/scn/game/tank.tscn -> Model/PlaceholderBody, Model/PlaceholderBarrel
     Orange box with a dark cylinder barrel pointing forward (+Z).
 
@@ -58,9 +55,11 @@ Enemy models: put replacements under each enemy's Model node, front facing +Z.
 The fade-in works with StandardMaterial3D/ORMMaterial3D materials; meshes using
 a ShaderMaterial will appear without fading.
 
-src/scn/game/arena.tscn -> PlaceholderFloor, PlaceholderLight, PlaceholderEnvironment
-    Plain dark floor plane (visual only, no collision), one directional
-    light without shadows, and flat ambient lighting.
+src/scn/game/arena.tscn -> PlaceholderLight, PlaceholderEnvironment
+    One directional light without shadows. The environment's settings are a
+    placeholder; the sky image it uses (src/gfx/sky/autumn_field_puresky_1k.hdr)
+    was added by the designer, not made by Claude. There is no floor: the
+    sky shows below the arena.
 src/scn/game/arena.tscn -> Walls (GridMap cell layout), spawn points and flags
     A test layout (20 x 15 cells, 80 x 60 m) for prototyping. Expected to be
     redesigned by the game designer.

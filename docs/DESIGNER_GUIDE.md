@@ -85,15 +85,27 @@ The minimum counts are constants at the top of `scripts/game/arena.gd`.
 
 The game is played on a flat plane 1 m above the floor (`PLANE_HEIGHT` in
 `scripts/game/gameplay.gd`). +X is right on screen and -Z is up on screen.
+The floor is not drawn, so the sky shows below the arena.
+
+**Lighting:** select `PlaceholderEnvironment` and open its Environment in the
+Inspector. It uses the sky image `gfx/sky/autumn_field_puresky_1k.hdr` for the
+background, ambient light and reflections.
+- To swap the image, open **Sky > Sky Material > Panorama**.
+- **Background > Energy Multiplier** brightens only the background.
+- **Ambient Light > Energy** brightens how the sky lights models.
+- **Sky > Radiance Size** (128) is the quality of the reflections: keep it
+  small for low spec machines.
+
+`PlaceholderLight` is the sun.
 
 ## The player (`scripts/game/player.gd`)
 
 | Constant | What it does |
 |---|---|
-| `MOVE_SPEED` | Walking speed, meters per second (15) |
+| `MOVE_SPEED` | Walking speed, meters per second |
 | `FIRE_INTERVAL` | Seconds between shots while Confirm is held (0.2) |
 | `BULLET_SPAWN_DISTANCE` | How far in front of the player bullets appear |
-| `DASH_SPEED_MULTIPLIER` | Dash speed as a multiple of `MOVE_SPEED` (3) |
+| `DASH_SPEED_MULTIPLIER` | Dash speed as a multiple of `MOVE_SPEED` |
 | `DASH_MAX_DISTANCE` | Longest dash in meters (12) |
 | `DASH_COOLDOWN` | Seconds from the start of one dash until the next is allowed (2) |
 | `MAX_HEALTH` | Starting health (3) |
@@ -111,7 +123,7 @@ animation in the `AnimationPlayer` plays during a dash; `RESET` plays when it en
 
 | Constant | What it does |
 |---|---|
-| `SPEED` | Meters per second (30) |
+| `SPEED` | Meters per second |
 | `LIFETIME` | Seconds before a bullet disappears on its own (5) |
 
 ## Enemies
@@ -129,8 +141,8 @@ Behaviour numbers are constants at the top of each script:
 | Script | Constants |
 |---|---|
 | `scripts/game/enemy/enemy.gd` (all enemies) | `FADE_IN_SECONDS` (0.25), `BULLET_SPAWN_GAP` |
-| `scripts/game/enemy/chaser.gd` | `SPEED` (2) |
-| `scripts/game/enemy/tank.gd` | `SPEED` (1), `FIRE_INTERVAL` (4), `BULLET_SPEED` |
+| `scripts/game/enemy/chaser.gd` | `SPEED` |
+| `scripts/game/enemy/tank.gd` | `SPEED`, `FIRE_INTERVAL` (4), `BULLET_SPEED` |
 | `scripts/game/enemy/angry_greg.gd` | `FIRE_INTERVAL` (4), `BULLET_SPEED` |
 
 Enemy size comes from the sphere in each scene's `CollisionShape3D`. The `Hurtbox`
@@ -153,7 +165,7 @@ example and recipes, is `docs/ENEMIES.md`.
 
 | Constant | What it does |
 |---|---|
-| `EnemyBullet.DEFAULT_SPEED` | Meters per second when an enemy does not set its own (2) |
+| `EnemyBullet.DEFAULT_SPEED` | Meters per second when an enemy does not set its own |
 | `EnemyBullet.LIFETIME` | Seconds before an unused bullet disappears (10) |
 | `EnemyBulletPool.STARTING_SIZE` | Bullets made when a game starts (128) |
 | `EnemyBulletPool.GROW_BY` | Bullets added when the pool runs out (a message is logged when this happens) |
