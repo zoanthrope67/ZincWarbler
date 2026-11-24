@@ -79,7 +79,7 @@ Saved hi-scores live in `user://hiscores.json`.
 | `EnemySpawnPoints` | Add `Marker3D` children. Enemy waves start on these (see Enemy spawning) |
 | `Flags` | Add instances of `scn/game/flag.tscn`. Give each flag one or more `Marker3D` children: those are its BossSpawnPoints. Keep them a few meters from the flag |
 | `BorderStorm` | The edge of the play area (see BorderStorm below). Move it to where the circle should start |
-| `PlaceholderFloor` | The floor: a large plane at y = 0 with a dark blue surface and blue grid lines (see Floor below) |
+| `PlaceholderFloor` | The floor: a large plane at y = 0 with a grid whose line colours shift in patches (see Floor below) |
 
 Only the X and Z position of markers matters. When a game starts the arena is
 checked (at least 1 PlayerSpawnPoint, 1 EnemySpawnPoint, 2 flags, a
@@ -90,12 +90,21 @@ The game is played on a flat plane 1 m above the floor (`PLANE_HEIGHT` in
 `scripts/game/gameplay.gd`). +X is right on screen and -Z is up on screen.
 
 **Floor:** `PlaceholderFloor` is a 1000 x 1000 m plane drawn with
-`gfx/placeholder/placeholder_cyber_floor.gdshader`. It ignores lighting.
-Select it and open **Mesh > Material > Shader Parameters** to change the base
-colour, line colour, grid size (4 m, matching the wall tiles), line width
-and the pulse that ripples out from the arena's middle (`Pulse Strength` 0
-turns it off). The grid is drawn in world meters, so moving or resizing the
-plane does not move the lines.
+`gfx/placeholder/placeholder_noise_colour_floor.gdshader`: a grid whose lines
+shift between two colours in patches that slowly drift and change shape (Perlin
+noise). It ignores lighting. Select it and open
+**Mesh > Material > Shader Parameters**:
+- `Base Color` is the floor between the lines; `Line Color` and `Line Color 2`
+  are the two colours the lines shift between.
+- `Cell Size` is one grid square in meters (4 matches the wall tiles) and
+  `Line Width` the line width in meters.
+- `Noise Size` is the size of the colour patches in meters, `Noise Speed` how
+  fast they drift (meters per second, 0 freezes them), and `Colour Contrast` how
+  sharp the change between the two colours is (1 is a soft blend).
+
+The grid is drawn in world meters, so moving or resizing the plane does not move
+the lines. Values set in the Inspector override the defaults written in the
+shader file; click a setting's revert arrow to use the file's default again.
 
 **Lighting:** select `PlaceholderEnvironment` and open its Environment in the
 Inspector. It uses the sky image `gfx/sky/autumn_field_puresky_1k.hdr` for the

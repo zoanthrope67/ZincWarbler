@@ -3,9 +3,9 @@
 [ext_resource type="Script" uid="uid://jg3y1yn0fiob" path="res://scripts/game/arena.gd" id="1_canl7"]
 [ext_resource type="MeshLibrary" uid="uid://bc1vvx05jx71l" path="res://gfx/placeholder/placeholder_wall_library.tres" id="2_6wbug"]
 [ext_resource type="PackedScene" path="res://scn/game/flag.tscn" id="3_bb2n5"]
-[ext_resource type="Texture2D" path="res://gfx/sky/autumn_field_puresky_1k.hdr" id="4_sky"]
-[ext_resource type="PackedScene" path="res://scn/game/border_storm.tscn" id="5_storm"]
-[ext_resource type="Shader" path="res://gfx/placeholder/placeholder_cyber_floor.gdshader" id="6_floor"]
+[ext_resource type="Shader" uid="uid://rs2p8qq40cpm" path="res://gfx/placeholder/placeholder_noise_colour_floor.gdshader" id="4_2nalq"]
+[ext_resource type="Texture2D" uid="uid://brnftjsoioogn" path="res://gfx/sky/autumn_field_puresky_1k.hdr" id="4_sky"]
+[ext_resource type="PackedScene" uid="uid://d2pa373vunhn5" path="res://scn/game/border_storm.tscn" id="5_storm"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_sky"]
 panorama = ExtResource("4_sky")
@@ -21,15 +21,16 @@ ambient_light_source = 3
 reflected_light_source = 2
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_floor"]
-shader = ExtResource("6_floor")
-shader_parameter/base_color = Color(0.02, 0.04, 0.13, 1)
-shader_parameter/line_color = Color(0.1, 0.45, 1, 1)
-shader_parameter/cell_size = 4.0
-shader_parameter/line_width = 0.12
-shader_parameter/pulse_strength = 0.4
-shader_parameter/pulse_speed = 2.0
-shader_parameter/pulse_spacing = 30.0
-shader_parameter/pulse_centre = Vector2(40, 30)
+render_priority = 0
+shader = ExtResource("4_2nalq")
+shader_parameter/base_color = Color(0.01, 0.01, 0.01, 1)
+shader_parameter/line_color = Color(0.011764706, 0.4862745, 0.011764706, 1)
+shader_parameter/line_color_2 = Color(0.44486517, 0.8314432, 0, 1)
+shader_parameter/cell_size = 2.0
+shader_parameter/line_width = 0.1
+shader_parameter/noise_size = 5.0
+shader_parameter/noise_speed = 3.0
+shader_parameter/colour_contrast = 1.5
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
 material = SubResource("ShaderMaterial_floor")
@@ -52,7 +53,7 @@ transform = Transform3D(0.8660254, 0.43301272, -0.24999999, 0, 0.49999997, 0.866
 [node name="PlaceholderEnvironment" type="WorldEnvironment" parent="." unique_id=2137882909]
 environment = SubResource("Environment_lyvdg")
 
-[node name="PlaceholderFloor" type="MeshInstance3D" parent="."]
+[node name="PlaceholderFloor" type="MeshInstance3D" parent="." unique_id=856801366]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 30)
 cast_shadow = 0
 mesh = SubResource("PlaneMesh_floor")
@@ -155,5 +156,5 @@ gizmo_extents = 1.5
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
 gizmo_extents = 1.5
 
-[node name="BorderStorm" parent="." instance=ExtResource("5_storm")]
+[node name="BorderStorm" parent="." unique_id=1119048562 instance=ExtResource("5_storm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 30)

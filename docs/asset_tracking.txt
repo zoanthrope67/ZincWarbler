@@ -60,9 +60,9 @@ src/scn/game/arena.tscn -> PlaceholderLight, PlaceholderEnvironment
     placeholder; the sky image it uses (src/gfx/sky/autumn_field_puresky_1k.hdr)
     was added by the designer, not made by Claude.
 src/scn/game/arena.tscn -> PlaceholderFloor (PlaneMesh, ShaderMaterial)
-src/gfx/placeholder/placeholder_cyber_floor.gdshader
-    "Cyber" floor: a 1000 x 1000 m unshaded plane at y = 0, dark blue with
-    blue 4 m grid lines and a slow pulse rippling out from the arena's middle.
+src/gfx/placeholder/placeholder_noise_colour_floor.gdshader
+    The floor: a 1000 x 1000 m unshaded plane at y = 0 with a grid whose lines
+    shift between two colours in slowly drifting Perlin noise patches.
 src/scn/game/arena.tscn -> Walls (GridMap cell layout), spawn points and flags
     A test layout (about 80 x 60 m) for prototyping. Expected to be
     redesigned by the game designer. The outer ring of walls was removed for
