@@ -114,6 +114,8 @@ Enemies are 2x2 meters large. Score is not awarded for killing an enemy. There s
 
 To save performance, a normal enemy that stays more than 150 meters from the player for 10 seconds is removed. The distance is measured flat, on X and Z only, and is a constant that the game designer can change. Coming back within 150 meters starts the 10 seconds again. A removed enemy is not defeated: it gives no score. Bosses are never removed this way.
 
+When an enemy or boss is hit, its model flashes red for 0.1 seconds. This is an effect only, driven by the enemy's fx_hit FX signal. The flash material and its length can be changed by the game designer for each enemy.
+
 The boss is:
  * Angry Greg: Static enemy. Fires an enemy bullet every 4 seconds towards the player with the first shot 4 seconds after they finish spawning. Can take 5 hits before being defeated. 10 points are awarded for defeating Greg.
 

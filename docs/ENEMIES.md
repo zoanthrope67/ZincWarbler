@@ -76,6 +76,8 @@ Look at the existing enemies for examples; they are short and commented:
 | `Max Hits` | Player bullet hits to defeat it |
 | `Score Value` | Score when defeated (normal enemies use 0 in the spec) |
 | `Is Boss` | Tick for bosses. Bosses are never removed for being far from the player. What makes something appear as a boss is being in the boss list (Step 3); bosses from that list are always treated as bosses, even if this is left unticked |
+| `Hit Flash Material` | Shown on the model for a moment each time it is hit. The default is the red placeholder flash. Clear it for no flash |
+| `Hit Flash Seconds` | How long the hit flash shows (0.1) |
 
 5. **Size.** The enemy's size is the radius of the sphere in the root's
    `CollisionShape3D`: 1.0 for a 2 x 2 m enemy, 2.0 for a 4 x 4 m boss.
@@ -149,6 +151,7 @@ These all come from `Enemy`:
 | `face(direction)` | Turns the Model to face a direction |
 | `shoot_at_target(speed)` | Fires one enemy bullet at the player (`speed` in m/s; leave it out for the default) |
 | `bullet_pool.fire(start, direction, speed)` | Fires one enemy bullet in any direction (see [Recipes](#recipes)) |
+| `GfxEffects.apply_gfx_material(_model, material, seconds)` | Shows a ShaderMaterial on the model for a while (effects only). See "Material effects" in `docs/DESIGNER_GUIDE.md` |
 
 | Value | What it is |
 |---|---|
@@ -414,6 +417,16 @@ var speed := SPEED
 if hits_left == 1:
 	speed = SPEED * 2.0   # faster on its last hit
 ```
+
+**Show a different look for a while**, e.g. glowing while charging up (needs
+`@export var charge_material: ShaderMaterial` at the top of the script):
+
+```gdscript
+GfxEffects.apply_gfx_material(_model, charge_material, CHARGE_SECONDS)
+```
+
+This replaces any hit flash that is showing, and a hit during it replaces this.
+For effects only; the enemy's behaviour should not depend on it.
 
 **Randomness:** `randf_range(1.0, 3.0)` gives a random number between 1 and 3;
 `[a, b, c].pick_random()` picks one of a list.

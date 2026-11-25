@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://c1nx3q5hwx62r"]
+
+[ext_resource type="Shader" uid="uid://by7pupm3dmp1b" path="res://gfx/placeholder/placeholder_hit_flash.gdshader" id="1_4yj5a"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_4yj5a")
+shader_parameter/flash_color = Color(1, 0, 0, 1)

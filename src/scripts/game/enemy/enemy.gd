@@ -57,6 +57,11 @@ const FAR_AWAY_SECONDS := 10.0
 ## True for bosses (they are spawned by the flags, not by the enemy spawner).
 ## Bosses are never removed for being far from the player.
 @export var is_boss := false
+## Material shown on the model for a moment each time this enemy is hit (an
+## effect only; see scripts/game/gfx_effects.gd). Empty = no flash.
+@export var hit_flash_material: ShaderMaterial = preload("res://gfx/placeholder/placeholder_hit_flash.tres")
+## How long the hit flash shows, in seconds.
+@export var hit_flash_seconds := 0.1
 
 ## The player. Set by whoever spawns the enemy. When the player is dead their
 ## node stays where they died, so enemies keep aiming at the last known position.
@@ -100,6 +105,9 @@ func _ready() -> void:
 	_hurtbox.monitoring = false
 	_start_fade_materials(_model)
 	_set_fade_amount(0.0)
+	# The hit flash listens to this enemy's own FX signal, so the game logic in
+	# take_hit() does not know about it.
+	fx_hit.connect(_on_fx_hit)
 	fx_spawn_started.emit(global_position)
 
 
@@ -131,6 +139,12 @@ func take_hit() -> void:
 	fx_hit.emit(global_position, hits_left)
 	if hits_left <= 0:
 		_defeat()
+
+
+# Flashes the model when hit (hit_flash_material for hit_flash_seconds). Effects only.
+func _on_fx_hit(_position: Vector3, _hits_left: int) -> void:
+	if hit_flash_material != null:
+		GfxEffects.apply_gfx_material(_model, hit_flash_material, hit_flash_seconds)
 
 
 # --- For enemy scripts to override ---------------------------------------------------

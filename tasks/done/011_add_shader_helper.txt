@@ -1,0 +1,15 @@
+There should be a new helper function to allow the designer to apply a shader to a Model for a certain amount of time.
+
+The function should be called apply_gfx_material() and it's arguments should be a reference to a Model, a reference to a ShaderMaterial or null, and a effect_seconds float. When called, it should overwrite the Models shader with the provided one for effect_seconds and then the shader should be removed. effects_seconds must be 0 or more and an invalid number should raise a push_warning and then return doing nothing. Zero is valid.
+
+If apply_gfx_material is called on a Model that already has an active shader from another apply_gfx_material then the old shader should be replaced with this one. Calling the function with a null shader can be used to remove a shader effect. If the game is paused then the timer should also be paused.
+
+# Examples
+
+Assume a model called Alan and 2 shaders, Red and Blue.
+
+If apply_gfx_material(Alan, Red, 67) then Alan should be Red for 67 seconds. If during those 67 seconds we called apply_gfx_material(Alan, Blue, 2) then the Red effect would be cancelled and Alan would be Blue for 2 seconds. After those 2 seconds Alan would be normal again and not Red.
+
+# New shaders and use
+
+A new placeholder shader should be added that flashes the given model red and apply_gfx_material should be used to apply this for 0.1 seconds on any enemy that takes damage using an FX signal. This should be implemented using the shared enemy script.

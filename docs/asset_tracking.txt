@@ -75,6 +75,13 @@ src/gfx/shaders/border_storm.gdshader
     look as needed; the circle and alpha uniforms are set from
     scripts/game/border_storm.gd.
 
+src/gfx/placeholder/placeholder_hit_flash.gdshader
+src/gfx/placeholder/placeholder_hit_flash.tres (ShaderMaterial using it)
+    Enemy hit flash: the whole model drawn flat red (unshaded) for 0.1 s when
+    hit. It is the default "Hit Flash Material" of every enemy
+    (scripts/game/enemy/enemy.gd). Replace it with the final hit effect; any
+    ShaderMaterial works.
+
 src/scn/ui/health_pip.tscn -> PlaceholderFrame, PlaceholderFill, AnimationPlayer
     Dark square with a red fill. The "lose" animation flashes the fill white,
     grows it, then shrinks and fades it out; "empty" leaves only the frame.

@@ -10,7 +10,7 @@ Where to change things in Zinc Warbler. All paths are inside `src/`.
 | `scn/game/` | Gameplay scenes: `arena.tscn`, `player.tscn`, `player_bullet.tscn`, `flag.tscn`, `chaser.tscn`, `tank.tscn`, `angry_greg.tscn`, `enemy_bullet.tscn`, `border_storm.tscn` |
 | `scripts/autoload/` | Global scripts that are always running: `GameState`, `Settings`, `Hiscores` |
 | `scripts/states/` | One script per state screen |
-| `scripts/game/` | Gameplay scripts (player, player bullets, arena, flags, camera, BorderStorm) |
+| `scripts/game/` | Gameplay scripts (player, player bullets, arena, flags, camera, BorderStorm), and `gfx_effects.gd` (material effects such as the hit flash) |
 | `scripts/game/enemy/` | Enemies, enemy bullets and their pool, the enemy spawner and `EnemyWave` |
 | `scripts/ui/` | Shared UI pieces (the keyboard/controller menu, the HUD, the pause menu) |
 | `gfx/placeholder/` | Placeholder art, see `docs/asset_tracking.txt` |
@@ -198,6 +198,8 @@ Every enemy scene has settings on its root node in the Inspector:
 | `Max Hits` | Player bullet hits to defeat it (Chaser 2, Tank 2, Angry Greg 5) |
 | `Score Value` | Score when defeated (Chaser 0, Tank 0, Angry Greg 10) |
 | `Is Boss` | Marks bosses. Bosses are never removed for being far away (below). Bosses in the FlagLoop's `Boss Scenes` are always treated as bosses, even if this is left unticked |
+| `Hit Flash Material` | Shown on the model for a moment each time it is hit (red placeholder: `gfx/placeholder/placeholder_hit_flash.tres`). Clear it for no flash |
+| `Hit Flash Seconds` | How long the hit flash shows (0.1) |
 
 Behaviour numbers are constants at the top of each script:
 
@@ -217,6 +219,14 @@ more than `FAR_AWAY_DISTANCE` meters from the player (measured flat) for
 `FAR_AWAY_SECONDS` is removed. Coming back within range starts the count again.
 It gives no score and is not a defeat, so `defeated` and `fx_defeated` are not
 emitted. Bosses are never removed this way.
+
+**Hit flash:** each hit shows `Hit Flash Material` on the enemy's model for
+`Hit Flash Seconds` (see Material effects below). It is set per enemy scene, so
+e.g. a boss can flash a different colour. All enemies share one flash material
+by default; to change the red, select `gfx/placeholder/placeholder_hit_flash.tres`
+and change `Flash Color` under Shader Parameters (that changes it for every
+enemy using it). For one enemy only, make a new material and set it on that
+enemy's scene.
 
 **Adding a new enemy:** copy `scn/game/chaser.tscn`, give it a new script that
 starts with `extends Enemy`, and fill in `_on_activated()` (runs once, when the
@@ -382,6 +392,32 @@ Named in Project Settings → Layer Names → 3D Physics, and listed in
 `scripts/game/gameplay.gd`: 1 Walls, 2 Player, 3 Enemies, 4 Player Bullets,
 5 Enemy Bullets, 6 Flags. Enemies block the player; bullets pass through nothing
 but walls and their targets.
+
+## Material effects (`scripts/game/gfx_effects.gd`)
+
+`GfxEffects.apply_gfx_material(model, material, effect_seconds)` shows a
+ShaderMaterial on every mesh under a model for a while, then puts the model's
+own look back. It can be called from any script. The enemy hit flash uses it:
+
+```gdscript
+GfxEffects.apply_gfx_material(_model, hit_flash_material, 0.1)
+```
+
+- Calling it again on the same model replaces the effect that is showing. When
+  the new one ends, the model goes back to normal, not to the old effect.
+- A `null` material, or 0 seconds, removes any effect that is showing.
+- A negative (or infinite) `effect_seconds` is a mistake: it logs a warning and
+  does nothing.
+- It counts game time, so it stops while the game is paused.
+- It covers every mesh under the model, including those inside an imported
+  `.glb`. It works by setting each mesh's **Material Override**, which wins over
+  all its other materials, and restores it afterwards.
+- If the model is freed while an effect shows (e.g. the enemy is defeated),
+  nothing goes wrong.
+
+Use it for effects only, never for game logic. One material can be shared by
+any number of models at once, which is cheap; changing that material's
+settings changes it for all of them.
 
 ## FX signals
 
