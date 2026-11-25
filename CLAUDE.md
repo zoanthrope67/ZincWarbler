@@ -12,7 +12,7 @@ Full spec: docs/SPEC.md
 src/ contains all source code
 docs/ contains all documentation
 docs/asset_tracking.txt contains a list of all placeholder assets. It does not need to include other assets.
-docs/future/ contains work in progress change requests for upcoming features that the designer might want later. These will change often as the game is playtested and designed. Claude must not edit files within this folder, the human will manually use them to create new change requests when they are ready.
+tasks/ contains the list of tasks that make up this project. Claude must not edit these files unless explicitly ordered to do so as one-off tasks
 build/ contains built executables for Linux/Windows which will be generated manually when required.
 Godot_v4.7.2-stable_linux.x86_64/ contains a copy of the Godot engine that is not tracked in git.
 
@@ -25,5 +25,4 @@ Godot_v4.7.2-stable_linux.x86_64/ contains a copy of the Godot engine that is no
 - The game will never attempt to access the internet
 - There must not be any memory leaks
 - The game should run on low spec machines
-- Claude should not upload assets in src/assets/handmade to remote servers or servers owned by Anthropic without explicit permission
 - No RigidBody3D forces, impulses or gravity should be used.
