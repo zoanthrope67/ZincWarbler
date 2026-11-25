@@ -1,8 +1,8 @@
 class_name Hud
 extends CanvasLayer
-## The in-game HUD: score, time survived, the health lifebar and the "YOU DIED"
-## banner. Layout and looks are in scn/ui/hud.tscn; animations are in its
-## AnimationPlayer:
+## The in-game HUD: score, time survived, the health lifebar, the BorderStorm's
+## DANGER warning and the "YOU DIED" banner. Layout and looks are in
+## scn/ui/hud.tscn; animations are in its AnimationPlayer:
 ##   "you_died"      - plays once when the player dies (fades the banner in)
 ##   "you_died_loop" - plays on repeat afterwards (pulses the banner)
 
@@ -16,12 +16,15 @@ var _shown_seconds := -1
 @onready var _score_label: Label = %ScoreLabel
 @onready var _time_label: Label = %TimeLabel
 @onready var _pips: HBoxContainer = %Pips
+@onready var _storm_danger: Control = %StormDanger
+@onready var _danger_bar: ProgressBar = %DangerBar
 @onready var _you_died: Control = %YouDied
 @onready var _continue_hint: Label = %ContinueHint
 @onready var _animation: AnimationPlayer = $AnimationPlayer
 
 
 func _ready() -> void:
+	_storm_danger.visible = false
 	_you_died.visible = false
 	# Hidden with transparency (not visibility) so the banner does not jump.
 	_continue_hint.modulate.a = 0.0
@@ -59,6 +62,16 @@ func set_health(health: int) -> void:
 		elif not pip.is_full:
 			pip.set_full()
 		index += 1
+
+
+## Shows the DANGER warning in the middle of the screen with its bar filled to
+## `progress` (0 = empty, 1 = full), or hides it when `show_warning` is false.
+## The bar fills while the player is in the BorderStorm and is full when the
+## storm starts hurting them (see BorderStorm.get_danger_progress()).
+func set_storm_danger(show_warning: bool, progress: float) -> void:
+	_storm_danger.visible = show_warning
+	if show_warning:
+		_danger_bar.value = clampf(progress, 0.0, 1.0)
 
 
 ## Shows the animated "YOU DIED" banner.

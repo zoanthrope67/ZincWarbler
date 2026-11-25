@@ -1,0 +1,11 @@
+# Task
+
+The border storms visual effects should be improved.
+
+The existing shader should be removed.
+
+A new shader should be added that only apply to the floor in the storm area and shifts all the colors so that any Green is Red, and Red is Blue and any Blue is Green. Only the floor will the visually affected by the storm and not other objects. The final floor graphics for the floor will be black and green so this is intentional.
+
+There should be a new model added to the Dynamic Storm. This should be a cylinder about 10 meters high with no top or bottom sides that marks the exact cut off between the storm and the safe area. This model should have a shader as a texture with alpha 0.2 that is a white noise effect, coloured in red.
+
+When the player is in the storm, a DANGER sprite should appear in the center of the screen and below that, a progress bar should fill. The bar will track the _time_in_storm and will be full when DAMAGE_DELAY_SECONDS is reached. Changing DAMAGE_DELAY_SECONDS should also update the bar. These UI elements should be hidden if the player dies.

@@ -68,12 +68,20 @@ src/scn/game/arena.tscn -> Walls (GridMap cell layout), spawn points and flags
     redesigned by the game designer. The outer ring of walls was removed for
     the BorderStorm; only the inner walls remain.
 
-src/scn/game/border_storm.tscn -> StormOverlay (PlaneMesh, ShaderMaterial)
-src/gfx/shaders/border_storm.gdshader
-    The look of the BorderStorm: everything outside the circle in greyscale with
-    TV static (white noise) over it, and a hard edge at the radius. Replace the
-    look as needed; the circle and alpha uniforms are set from
+src/scn/game/border_storm.tscn -> StormRing (ShaderMaterial; mesh built in code)
+src/gfx/shaders/storm_ring.gdshader
+    The BorderStorm's ring: a flat 1 m ring of red TV static (white noise) on the
+    floor just outside the edge of the circle. Replace the look as needed; the
+    shader places the ring itself, and ring_alpha and ring_width are set from
     scripts/game/border_storm.gd.
+src/gfx/shaders/storm_floor.gdshaderinc
+    The storm's floor colour shift (green to red, red to blue, blue to green)
+    used by the floor shader. Keep using it in the final floor shader.
+
+src/scn/ui/hud.tscn -> StormDanger/Center/Layout/PlaceholderDanger, DangerBar
+    Red outlined "DANGER" text in the middle of the screen. The spec asks for a
+    DANGER sprite; replace with a TextureRect. The bar is a ProgressBar with a
+    plain red fill; keep the name DangerBar (the code sets its value).
 
 src/gfx/placeholder/placeholder_hit_flash.gdshader
 src/gfx/placeholder/placeholder_hit_flash.tres (ShaderMaterial using it)

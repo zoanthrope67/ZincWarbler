@@ -158,4 +158,3 @@ gizmo_extents = 1.5
 
 [node name="BorderStorm" parent="." unique_id=1119048562 instance=ExtResource("5_storm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 30)
-storm_alpha = 0.3

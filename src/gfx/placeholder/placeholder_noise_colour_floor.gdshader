@@ -7,7 +7,11 @@
 //
 // Change the settings by selecting PlaceholderFloor in scn/game/arena.tscn and
 // opening Mesh > Material > Shader Parameters in the Inspector.
+//
+// The BorderStorm's colour shift comes from gfx/shaders/storm_floor.gdshaderinc
+// (the last line of fragment()). A replacement floor shader needs the same.
 shader_type spatial;
+#include "res://gfx/shaders/storm_floor.gdshaderinc"
 // Unshaded: the floor ignores lights and the sky, it is always these colours.
 render_mode unshaded, shadows_disabled;
 
@@ -76,5 +80,6 @@ void fragment() {
 	float shift = clamp(0.5 + n * colour_contrast * 2.0, 0.0, 1.0);
 	vec3 lines_colour = mix(line_color, line_color_2, shift);
 
-	ALBEDO = mix(base_color, lines_colour, line);
+	// In the BorderStorm the colours are shifted (storm_floor.gdshaderinc).
+	ALBEDO = storm_floor_colour(mix(base_color, lines_colour, line), world_xz);
 }

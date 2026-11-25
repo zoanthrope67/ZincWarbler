@@ -1,28 +1,22 @@
 [gd_scene format=3 uid="uid://d2pa373vunhn5"]
 
 [ext_resource type="Script" uid="uid://vg6fn3omvye0" path="res://scripts/game/border_storm.gd" id="1_storm"]
-[ext_resource type="Shader" uid="uid://d21iqxsm3bowu" path="res://gfx/shaders/border_storm.gdshader" id="2_shader"]
+[ext_resource type="Shader" uid="uid://pim5emwl0i5p" path="res://gfx/shaders/storm_ring.gdshader" id="2_ring"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_storm"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ring"]
 resource_local_to_scene = true
-render_priority = 127
-shader = ExtResource("2_shader")
-shader_parameter/centre = Vector2(0, 0)
-shader_parameter/radius = 100.0
-shader_parameter/storm_alpha = 0.5
+shader = ExtResource("2_ring")
+shader_parameter/ring_alpha = 1.0
+shader_parameter/ring_width = 1.0
+shader_parameter/ring_colour = Color(1, 0, 0, 1)
 shader_parameter/static_size = 2.0
 shader_parameter/static_fps = 30.0
 shader_parameter/static_min = 0.0
 shader_parameter/static_max = 1.0
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_storm"]
-material = SubResource("ShaderMaterial_storm")
-size = Vector2(1000, 1000)
-
 [node name="BorderStorm" type="Node3D" unique_id=1918972358]
 script = ExtResource("1_storm")
 
-[node name="StormOverlay" type="MeshInstance3D" parent="." unique_id=738973830]
-visible = false
+[node name="StormRing" type="MeshInstance3D" parent="." unique_id=1542871193]
 cast_shadow = 0
-mesh = SubResource("PlaneMesh_storm")
+material_override = SubResource("ShaderMaterial_ring")

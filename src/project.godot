@@ -105,3 +105,14 @@ rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.06, 0.06, 0.09, 1)
+
+[shader_globals]
+
+storm_centre={
+"type": "vec2",
+"value": Vector2(0, 0)
+}
+storm_radius={
+"type": "float",
+"value": 1000000.0
+}

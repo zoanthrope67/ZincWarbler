@@ -20,11 +20,16 @@ extends Node3D
 ##
 ## All distances are measured flat, on X and Z only.
 ##
-## Looks: the StormOverlay child draws the storm (the scene under it turned
-## grey, with TV static over it) with the shader gfx/shaders/border_storm.gdshader.
-## It has a hard edge exactly where the storm starts to hurt the player.
-## The alpha is the Inspector setting below; the static's own settings are on
-## the shader (see docs/DESIGNER_GUIDE.md, BorderStorm).
+## Looks (see docs/DESIGNER_GUIDE.md, BorderStorm):
+## - The floor in the storm has its colours shifted (green to red, red to blue,
+##   blue to green). Only the floor changes. This script passes the circle to
+##   the floor's shader through the global shader settings `storm_centre` and
+##   `storm_radius` (shader code: gfx/shaders/storm_floor.gdshaderinc).
+## - The StormRing child is a flat ring of red static lying on the floor just
+##   outside the edge (so it is in the storm), `ring_width` meters wide. Its
+##   shader (gfx/shaders/storm_ring.gdshader) fits it to the circle every frame
+##   from the same global shader settings; this script only builds its mesh once.
+## - The HUD's DANGER warning reads get_danger_progress().
 
 # --- FX signals (effects and sounds only; never used for game logic) -------
 ## The player has gone outside the circle, into the storm.
@@ -36,6 +41,19 @@ signal fx_player_left_storm
 const DAMAGE_DELAY_SECONDS := 3.0
 ## The radius never goes below this, in meters (a safety minimum).
 const MIN_RADIUS := 0.01
+
+## The global shader settings this script sets (Project Settings > Shader Globals).
+const SHADER_CENTRE := &"storm_centre"
+const SHADER_RADIUS := &"storm_radius"
+## The radius given to the floor shader when no storm is running, so the whole
+## floor shows its normal colours. Matches the default in Shader Globals.
+const NO_STORM_RADIUS := 1000000.0
+## How many straight pieces the StormRing is made of. 256 keeps it within about
+## 1 cm of a true circle at a 100 m radius.
+const RING_SEGMENTS := 256
+## How far above the floor the StormRing lies, in meters (just enough that the
+## floor does not flicker through it).
+const RING_LIFT := 0.01
 
 @export_group("Radius")
 ## The radius of the circle in meters. This is the starting radius; it then
@@ -53,9 +71,10 @@ const MIN_RADIUS := 0.01
 @export var storm_movement_speed := 0.5
 
 @export_group("Looks")
-## How strong the static is over the greyscale scene: 0 shows only the grey
-## scene, 1 hides it under the static.
-@export_range(0.0, 1.0) var storm_alpha := 0.6
+## How see-through the StormRing is: 0 invisible, 1 solid.
+@export_range(0.0, 1.0) var ring_alpha := 1.0
+## Width of the StormRing in meters, from the edge of the circle outwards.
+@export var ring_width := 1.0
 
 ## True while the player is in the storm (outside the circle).
 var player_in_storm := false
@@ -70,19 +89,28 @@ var _time_in_storm := 0.0
 # between physics frames on fast screens.
 var _previous_radius := 0.0
 
-@onready var _overlay: MeshInstance3D = $StormOverlay
-@onready var _material: ShaderMaterial = _overlay.get_active_material(0)
+@onready var _ring: MeshInstance3D = $StormRing
+@onready var _ring_material: ShaderMaterial = _ring.material_override
 
 
 func _ready() -> void:
 	current_radius = maxf(current_radius, MIN_RADIUS)
 	_previous_radius = current_radius
-	# The overlay is placed in world space under the camera (see _process),
-	# not relative to this node.
-	_overlay.top_level = true
-	_overlay.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
-	_overlay.visible = true
+	# The ring's shader places it in the world itself (from the shader globals),
+	# so the node stays still at the world origin, just above the floor.
+	_ring.top_level = true
+	_ring.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	_ring.global_transform = Transform3D(Basis.IDENTITY, Vector3(0.0, global_position.y + RING_LIFT, 0.0))
+	_ring.mesh = _build_ring_mesh()
+	# The shader moves the ring anywhere, so Godot cannot tell where it is from
+	# the mesh. A huge box stops it being skipped as "off screen" by mistake.
+	_ring.custom_aabb = AABB(Vector3(-1e6, -1.0, -1e6), Vector3(2e6, 2.0, 2e6))
 	_update_looks()
+
+
+func _exit_tree() -> void:
+	# The shader globals outlive this node: put the floor back to normal.
+	RenderingServer.global_shader_parameter_set(SHADER_RADIUS, NO_STORM_RADIUS)
 
 
 ## Connects the storm to the game. Called by the In Game scene. Until this is
@@ -100,6 +128,16 @@ func setup(player: Player, flag_loop: FlagLoop, flags: Array[Flag]) -> void:
 ## True if `point` is outside the circle (in the storm). Measured flat.
 func is_in_storm(point: Vector3) -> bool:
 	return _flat_distance(point, global_position) > current_radius
+
+
+## How close the storm is to hurting the player, from 0 to 1: 0 when the player
+## is inside the circle (or has just gone out), 1 once they have been in the
+## storm for DAMAGE_DELAY_SECONDS (it stays 1 while the storm hurts them).
+## Used by the HUD's DANGER bar.
+func get_danger_progress() -> float:
+	if not player_in_storm:
+		return 0.0
+	return clampf(_time_in_storm / DAMAGE_DELAY_SECONDS, 0.0, 1.0)
 
 
 func _physics_process(delta: float) -> void:
@@ -170,21 +208,39 @@ func _hurt_player_in_storm(delta: float) -> void:
 
 # --- Looks -------------------------------------------------------------------
 
-# Keeps the overlay under the camera (so it always fills the screen) and passes
-# the circle and the Inspector settings to the shader.
+# Passes the circle to the floor and ring shaders, and the Inspector settings to
+# the ring.
 func _update_looks() -> void:
-	var camera := get_viewport().get_camera_3d()
-	if camera != null:
-		_overlay.global_position = Vector3(camera.global_position.x, Gameplay.PLANE_HEIGHT, camera.global_position.z)
-	else:
-		_overlay.global_position = Vector3(global_position.x, Gameplay.PLANE_HEIGHT, global_position.z)
-
 	# Blend between physics frames so the edge moves smoothly on fast screens.
 	var centre := get_global_transform_interpolated().origin
 	var radius := lerpf(_previous_radius, current_radius, Engine.get_physics_interpolation_fraction())
-	_material.set_shader_parameter(&"centre", Vector2(centre.x, centre.z))
-	_material.set_shader_parameter(&"radius", radius)
-	_material.set_shader_parameter(&"storm_alpha", storm_alpha)
+	RenderingServer.global_shader_parameter_set(SHADER_CENTRE, Vector2(centre.x, centre.z))
+	RenderingServer.global_shader_parameter_set(SHADER_RADIUS, radius)
+	_ring_material.set_shader_parameter(&"ring_alpha", ring_alpha)
+	_ring_material.set_shader_parameter(&"ring_width", maxf(ring_width, 0.0))
+
+
+# A flat ring of radius 1 around the origin, made of RING_SEGMENTS pieces. Each
+# piece joins two points on the inner edge (UV.x = 0) and two on the outer edge
+# (UV.x = 1). The shader (storm_ring.gdshader) moves the points to the storm's
+# circle every frame, so the mesh is only built once.
+func _build_ring_mesh() -> ArrayMesh:
+	var vertices := PackedVector3Array()
+	var uvs := PackedVector2Array()
+	for i in RING_SEGMENTS + 1:
+		var angle := TAU * i / RING_SEGMENTS
+		var point := Vector3(cos(angle), 0.0, sin(angle))
+		vertices.append(point)
+		uvs.append(Vector2(0.0, 0.0))
+		vertices.append(point)
+		uvs.append(Vector2(1.0, 0.0))
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLE_STRIP, arrays)
+	return mesh
 
 
 func _flat_distance(a: Vector3, b: Vector3) -> float:

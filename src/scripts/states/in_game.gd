@@ -17,7 +17,8 @@ extends Node3D
 ##   EnemySpawner   - makes normal enemies appear
 ##   FlagLoop       - flags, scoring for flags and bosses appearing
 ##   Camera         - follows the player
-##   HUD            - score, time, health and the "YOU DIED" banner
+##   HUD            - score, time, health, the storm's DANGER warning and the
+##                    "YOU DIED" banner
 ##   PauseMenu      - the pause menu and the countdown when resuming
 ##                    (scripts/ui/pause_menu.gd)
 ##
@@ -52,6 +53,8 @@ var time_since_death := -1.0
 ## flag touched. Later features will add more ways to increase Danger.
 var danger_level := 0.0
 
+var _storm: BorderStorm = null
+
 # Fixed at the moment the player dies.
 var _seconds_survived_at_death := 0
 var _datetime_at_death := ""
@@ -85,7 +88,8 @@ func _ready() -> void:
 	_spawner.enemy_spawned.connect(_on_enemy_spawned)
 	_flag_loop.setup(self, _arena, _player, _spawner)
 	_flag_loop.score_awarded.connect(add_score)
-	_arena.get_border_storm().setup(_player, _flag_loop, _arena.get_flags())
+	_storm = _arena.get_border_storm()
+	_storm.setup(_player, _flag_loop, _arena.get_flags())
 
 	_camera.target = _player
 	_camera.snap_to_target()
@@ -119,6 +123,14 @@ func _physics_process(delta: float) -> void:
 		_end_game()
 
 
+# The storm's DANGER warning. Done here, after all the physics frames, so it
+# always shows the storm's latest state (this scene's _physics_process runs
+# before the BorderStorm's).
+func _process(_delta: float) -> void:
+	if _storm != null and not _player.is_dead:
+		_hud.set_storm_danger(_storm.player_in_storm, _storm.get_danger_progress())
+
+
 # A Confirm press only counts if it starts after the skip time; holding Confirm
 # down from earlier (e.g. while firing when the player died) does not count.
 func _unhandled_input(event: InputEvent) -> void:
@@ -150,6 +162,9 @@ func _on_player_died() -> void:
 	_seconds_survived_at_death = floori(time_survived)
 	_datetime_at_death = Time.get_datetime_string_from_system()
 	time_since_death = 0.0
+	# The storm warning is hidden once the player is dead (it is no longer
+	# updated after this, see _process).
+	_hud.set_storm_danger(false, 0.0)
 	_hud.show_you_died()
 	fx_you_died_shown.emit()
 

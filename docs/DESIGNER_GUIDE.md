@@ -14,7 +14,7 @@ Where to change things in Zinc Warbler. All paths are inside `src/`.
 | `scripts/game/enemy/` | Enemies, enemy bullets and their pool, the enemy spawner and `EnemyWave` |
 | `scripts/ui/` | Shared UI pieces (the keyboard/controller menu, the HUD, the pause menu) |
 | `gfx/placeholder/` | Placeholder art, see `docs/asset_tracking.txt` |
-| `gfx/shaders/` | Shaders (the BorderStorm's look) |
+| `gfx/shaders/` | Shaders: the BorderStorm's ring (`storm_ring.gdshader`) and the storm's floor colours (`storm_floor.gdshaderinc`) |
 | `gfx/`, `bgm/`, `sfx/` | Final graphics, music and sound effects |
 
 ## Controls
@@ -103,7 +103,8 @@ noise). It ignores lighting. Select it and open
   sharp the change between the two colours is (1 is a soft blend).
 
 The grid is drawn in world meters, so moving or resizing the plane does not move
-the lines. Values set in the Inspector override the defaults written in the
+the lines. In the BorderStorm the floor's colours are shifted (see BorderStorm
+below); a replacement floor shader needs the same one line to show the storm. Values set in the Inspector override the defaults written in the
 shader file; click a setting's revert arrow to use the file's default again.
 
 **Lighting:** select `PlaceholderEnvironment` and open its Environment in the
@@ -138,28 +139,51 @@ Select `BorderStorm` in `scn/game/arena.tscn` and change these in the Inspector:
 | `Target Radius` | The radius the circle grows or shrinks towards. Lower it for a time limit |
 | `Radius Grow Speed`, `Radius Shrink Speed` | Meters per second the radius changes when growing / shrinking |
 | `Storm Movement Speed` | Meters per second the circle moves towards its target |
-| `Storm Alpha` | How strong the static is over the greyscale scene: 0 shows only the grey scene, 1 only static |
+| `Ring Alpha` | How see-through the red static ring on the edge is: 0 invisible, 1 solid (1) |
+| `Ring Width` | Width of that ring in meters, from the edge outwards (1) |
 
 | Constant (`scripts/game/border_storm.gd`) | What it does |
 |---|---|
-| `DAMAGE_DELAY_SECONDS` | Seconds in the storm before it starts hurting the player (3) |
+| `DAMAGE_DELAY_SECONDS` | Seconds in the storm before it starts hurting the player (3). The HUD's DANGER bar fills over this time, so it follows any change |
 | `MIN_RADIUS` | The radius never goes below this (0.01) |
 
 From code, change `current_radius` or `target_radius` on the BorderStorm (e.g.
 `_arena.get_border_storm().target_radius = 20.0`). `is_in_storm(position)` says
-whether a point is in the storm.
+whether a point is in the storm. `get_danger_progress()` gives how close the
+storm is to hurting the player, from 0 to 1 (used by the DANGER bar).
 
-**Look:** the `StormOverlay` child is one large plane, kept under the camera,
-drawn on top of everything with `gfx/shaders/border_storm.gdshader`. Outside the
-circle it turns everything under it grey and mixes TV static over it. Its edge
-is hard and exactly at the radius, where the storm starts to hurt the player.
-- The static's settings are on the shader. Open `scn/game/border_storm.tscn`,
-  select `StormOverlay` and look under **Mesh > Material > Shader Parameters**:
-  `Static Size` (screen pixels per dot), `Static Fps` (how often it changes per
-  second) and `Static Min` / `Static Max` (darkest and brightest dots, 0 to 1).
-- The overlay is hidden in the editor and shown when the game runs.
-- To make the grey work it reads the screen (Godot copies the screen once per
-  frame for it). This is a small, fixed cost.
+**Look:** only the floor and the ring show the storm; the player, enemies,
+walls and everything else look the same inside and outside it.
+- **Floor:** in the storm, the floor's colours are shifted: green becomes red,
+  red becomes blue and blue becomes green. Black, white and greys do not change
+  (the final floor is black and green, so its green turns red). The edge is
+  hard and exactly at the radius, where the storm starts to hurt the player.
+- **Ring:** the `StormRing` child is a flat ring of red TV static lying on the
+  floor just outside the edge, so the whole ring is in the storm and its inner
+  edge is where the storm starts to hurt. It is `Ring Width` meters wide at any
+  radius and see-through by `Ring Alpha`. Players, enemies and walls are drawn
+  over it. Its shader fits it to the circle every frame (the mesh is built once
+  when the game starts, so the ring does not show in the editor). Its static's
+  settings are on its material: open `scn/game/border_storm.tscn`, select
+  `StormRing` and look under **Material Override > Shader Parameters**:
+  `Ring Colour`, `Static Size` (screen pixels per dot), `Static Fps` (how often
+  it changes per second) and `Static Min` / `Static Max` (darkest and brightest
+  dots, 0 to 1).
+- **DANGER warning:** see the HUD section.
+
+**How the floor and ring know about the storm:** the BorderStorm sets two global shader
+settings every frame, `storm_centre` and `storm_radius` (Project Settings >
+Shader Globals). `gfx/shaders/storm_floor.gdshaderinc` reads them and does the
+colour shift. Any floor shader can use it:
+1. Under `shader_type spatial;` add
+   `#include "res://gfx/shaders/storm_floor.gdshaderinc"`.
+2. Pass the floor's final colour through it at the end of `fragment()`:
+   `ALBEDO = storm_floor_colour(my_colour, world_xz);` where `world_xz` is the
+   flat world position (see `placeholder_noise_colour_floor.gdshader` for how
+   to work it out in `vertex()`).
+
+Use it on floor shaders only. Outside a game (and in the editor) the radius is
+huge, so the floor shows its normal colours.
 
 ## The player (`scripts/game/player.gd`)
 
@@ -343,6 +367,7 @@ Open the scenes to restyle them; the code only sets text and plays animations.
 |---|---|
 | Score text format | `SCORE_TEXT` in `scripts/ui/hud.gd` |
 | Score / time / pip layout | `TopBar` in `scn/ui/hud.tscn` |
+| BorderStorm DANGER warning and its bar | `StormDanger` in `scn/ui/hud.tscn` (`PlaceholderDanger` text and `DangerBar`). Shown in the middle of the screen while the player is in the storm; the bar fills over `DAMAGE_DELAY_SECONDS` and is full when the storm starts hurting them. Hidden when the player dies |
 | "YOU DIED" banner and its hint | `YouDied` in `scn/ui/hud.tscn` |
 | Banner animations | `AnimationPlayer` in `scn/ui/hud.tscn`: `you_died` plays once, then `you_died_loop` repeats |
 | Pip look | `scn/ui/health_pip.tscn`. Its `AnimationPlayer` has `full`, `lose` (plays when health is lost) and `empty` (shown after `lose`) |
