@@ -62,6 +62,10 @@ func _spawn_boss() -> void:
 		return
 	var point: Marker3D = _last_touched_flag.get_boss_spawn_points().pick_random()
 	current_boss = _spawner.spawn_enemy(boss_scenes.pick_random(), point.global_position)
+	# Always treat it as a boss, even if Is Boss was left unticked on its scene.
+	# Bosses are never removed for being far from the player, so the loop
+	# cannot get stuck waiting for a boss that is gone.
+	current_boss.is_boss = true
 	current_boss.defeated.connect(_on_boss_defeated)
 	boss_spawned.emit(current_boss)
 

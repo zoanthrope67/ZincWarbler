@@ -9,6 +9,9 @@ extends CharacterBody3D
 ##   2. Active: it moves and attacks (see each enemy's own script). It blocks
 ##      the player, and touching the player hurts them.
 ##   3. Defeated: after `max_hits` hits from player bullets it is removed.
+##      Or removed when far away: a normal enemy (not a boss) that stays more
+##      than FAR_AWAY_DISTANCE from the player for FAR_AWAY_SECONDS is removed
+##      to save performance. That is not a defeat: no score, no `defeated`.
 ##
 ## To make a new enemy: make a scene like scn/game/chaser.tscn, and a script that
 ## extends Enemy and overrides _on_activated() and/or _active_physics_process().
@@ -40,12 +43,19 @@ const BULLET_SPAWN_GAP := 0.3
 ## How far (meters) an enemy may drift above or below the gameplay plane before
 ## it is moved back onto it.
 const PLANE_TOLERANCE := 0.001
+## An active normal enemy further than this from the player, in meters
+## (measured flat, on X and Z), starts counting towards being removed.
+const FAR_AWAY_DISTANCE := 150.0
+## Seconds an enemy must stay further than FAR_AWAY_DISTANCE before it is
+## removed. Coming back within FAR_AWAY_DISTANCE starts the count again.
+const FAR_AWAY_SECONDS := 10.0
 
 ## Player bullet hits needed to defeat this enemy.
 @export var max_hits := 2
 ## Score given to the player when this enemy is defeated.
 @export var score_value := 0
 ## True for bosses (they are spawned by the flags, not by the enemy spawner).
+## Bosses are never removed for being far from the player.
 @export var is_boss := false
 
 ## The player. Set by whoever spawns the enemy. When the player is dead their
@@ -62,7 +72,12 @@ var touching_player := false
 var body_radius := 1.0
 
 var _fade_time := 0.0
-var _is_defeated := false
+# True once the enemy has been defeated or removed for being far away. It does
+# nothing more after that, while it waits to be freed.
+var _is_removed := false
+# Seconds this enemy has been further than FAR_AWAY_DISTANCE from the player
+# without coming back.
+var _far_away_time := 0.0
 # Temporary see-through copies of the model's materials, used only while fading
 # in: [{"mesh": MeshInstance3D, "surface": int, "material": BaseMaterial3D,
 # "alpha": float (the material's own alpha)}]
@@ -89,7 +104,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _is_defeated:
+	if _is_removed:
 		return
 	if not is_active:
 		_fade_time += delta
@@ -105,11 +120,12 @@ func _physics_process(delta: float) -> void:
 	if absf(global_position.y - Gameplay.PLANE_HEIGHT) > PLANE_TOLERANCE:
 		global_position.y = Gameplay.PLANE_HEIGHT
 	_hurt_player_if_touching()
+	_remove_if_far_away(delta)
 
 
 ## Called by player bullets. Does nothing while fading in.
 func take_hit() -> void:
-	if not is_active or _is_defeated:
+	if not is_active or _is_removed:
 		return
 	hits_left -= 1
 	fx_hit.emit(global_position, hits_left)
@@ -225,15 +241,38 @@ func _hurt_player_if_touching() -> void:
 
 
 func _defeat() -> void:
-	_is_defeated = true
+	_stop_and_free()
+	fx_defeated.emit(global_position)
+	defeated.emit(self)
+
+
+# Counts how long the enemy has been far from the player, and removes it once
+# that reaches FAR_AWAY_SECONDS. Bosses are never removed: the flags only come
+# back when the boss is defeated.
+func _remove_if_far_away(delta: float) -> void:
+	if is_boss:
+		return
+	var offset := get_target_position() - global_position
+	offset.y = 0.0
+	if offset.length_squared() <= FAR_AWAY_DISTANCE * FAR_AWAY_DISTANCE:
+		_far_away_time = 0.0
+		return
+	_far_away_time += delta
+	# The tiny tolerance stops floating point rounding from making it a frame late.
+	if _far_away_time >= FAR_AWAY_SECONDS - 0.0001:
+		# Not a defeat: no score, no `defeated` signal and no fx_defeated.
+		_stop_and_free()
+
+
+# Takes the enemy out of play and frees it at the end of the frame.
+func _stop_and_free() -> void:
+	_is_removed = true
 	is_active = false
-	# Deferred: this usually runs inside a bullet's collision callback, where
+	# Deferred: a defeat runs inside a bullet's collision callback, where
 	# physics settings cannot be changed.
 	set_deferred("collision_layer", 0)
 	set_deferred("collision_mask", 0)
 	_hurtbox.set_deferred("monitoring", false)
-	fx_defeated.emit(global_position)
-	defeated.emit(self)
 	queue_free()
 
 

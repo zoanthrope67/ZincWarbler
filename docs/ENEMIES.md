@@ -44,6 +44,11 @@ An enemy's life:
 3. **Defeated.** After `Max Hits` hits from player bullets it is removed, and
    the player gets its `Score Value`.
 
+A normal enemy that stays more than 150 m from the player for 10 seconds is
+also removed, to save performance (`FAR_AWAY_DISTANCE` and `FAR_AWAY_SECONDS`
+in `enemy.gd`). That is not a defeat: no score, and `defeated` is not emitted.
+Bosses are never removed this way.
+
 Look at the existing enemies for examples; they are short and commented:
 - `chaser.gd` moves in a straight line and turns at walls.
 - `tank.gd` moves towards the player and shoots.
@@ -70,7 +75,7 @@ Look at the existing enemies for examples; they are short and commented:
 |---|---|
 | `Max Hits` | Player bullet hits to defeat it |
 | `Score Value` | Score when defeated (normal enemies use 0 in the spec) |
-| `Is Boss` | Tick for bosses. It is a label only; what makes something a boss is being in the boss list (Step 3) |
+| `Is Boss` | Tick for bosses. Bosses are never removed for being far from the player. What makes something appear as a boss is being in the boss list (Step 3); bosses from that list are always treated as bosses, even if this is left unticked |
 
 5. **Size.** The enemy's size is the radius of the sphere in the root's
    `CollisionShape3D`: 1.0 for a 2 x 2 m enemy, 2.0 for a 4 x 4 m boss.

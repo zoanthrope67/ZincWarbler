@@ -112,6 +112,8 @@ The normal enemies are:
 
 Enemies are 2x2 meters large. Score is not awarded for killing an enemy. There should be no cap on enemy spawns for now, future development will consider this.
 
+To save performance, a normal enemy that stays more than 150 meters from the player for 10 seconds is removed. The distance is measured flat, on X and Z only, and is a constant that the game designer can change. Coming back within 150 meters starts the 10 seconds again. A removed enemy is not defeated: it gives no score. Bosses are never removed this way.
+
 The boss is:
  * Angry Greg: Static enemy. Fires an enemy bullet every 4 seconds towards the player with the first shot 4 seconds after they finish spawning. Can take 5 hits before being defeated. 10 points are awarded for defeating Greg.
 

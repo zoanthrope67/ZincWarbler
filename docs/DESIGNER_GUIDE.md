@@ -197,13 +197,13 @@ Every enemy scene has settings on its root node in the Inspector:
 |---|---|
 | `Max Hits` | Player bullet hits to defeat it (Chaser 2, Tank 2, Angry Greg 5) |
 | `Score Value` | Score when defeated (Chaser 0, Tank 0, Angry Greg 10) |
-| `Is Boss` | Marks bosses |
+| `Is Boss` | Marks bosses. Bosses are never removed for being far away (below). Bosses in the FlagLoop's `Boss Scenes` are always treated as bosses, even if this is left unticked |
 
 Behaviour numbers are constants at the top of each script:
 
 | Script | Constants |
 |---|---|
-| `scripts/game/enemy/enemy.gd` (all enemies) | `FADE_IN_SECONDS` (0.25), `BULLET_SPAWN_GAP` |
+| `scripts/game/enemy/enemy.gd` (all enemies) | `FADE_IN_SECONDS` (0.25), `BULLET_SPAWN_GAP`, `FAR_AWAY_DISTANCE` (150), `FAR_AWAY_SECONDS` (10) |
 | `scripts/game/enemy/chaser.gd` | `SPEED` |
 | `scripts/game/enemy/tank.gd` | `SPEED`, `FIRE_INTERVAL` (4), `BULLET_SPEED` |
 | `scripts/game/enemy/angry_greg.gd` | `FIRE_INTERVAL` (4), `BULLET_SPEED` |
@@ -211,6 +211,12 @@ Behaviour numbers are constants at the top of each script:
 Enemy size comes from the sphere in each scene's `CollisionShape3D`. The `Hurtbox`
 sphere should be slightly bigger (0.1 m); touching the player inside it hurts them.
 Enemies block the player but pass through each other.
+
+**Far-away enemies are removed** to save performance. A normal enemy that stays
+more than `FAR_AWAY_DISTANCE` meters from the player (measured flat) for
+`FAR_AWAY_SECONDS` is removed. Coming back within range starts the count again.
+It gives no score and is not a defeat, so `defeated` and `fx_defeated` are not
+emitted. Bosses are never removed this way.
 
 **Adding a new enemy:** copy `scn/game/chaser.tscn`, give it a new script that
 starts with `extends Enemy`, and fill in `_on_activated()` (runs once, when the
