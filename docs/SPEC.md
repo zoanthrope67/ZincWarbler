@@ -152,7 +152,7 @@ Each flag must have its own set of BossSpawnPoints. When a boss is spawned, a ra
 
 Instead of outer walls, the play area is a circle called the BorderStorm. Everything outside the circle is "the storm". All BorderStorm distances are measured flat, on X and Z only.
 
-The centre of the circle is a Node3D that is a child of the Arena. It starts in the middle of the arena, and the game designer can move its starting position. The area outside the circle is shown in greyscale with a TV static (white noise) effect over it. The effect has a hard edge exactly at the circle's radius, where the storm starts to hurt the player. The alpha of the static can be changed by the game designer and defaults to 0.5.
+The centre of the circle is a Node3D that is a child of the Arena. It starts in the middle of the arena, and the game designer can move its starting position. The area outside the circle is shown in greyscale with a TV static (white noise) effect over it. The effect has a hard edge exactly at the circle's radius, where the storm starts to hurt the player. The alpha of the static can be changed by the game designer.
 
 The circle moves towards a random uncollected flag. Each time a flag is collected, another random uncollected flag is chosen. When a boss is spawned, the circle moves towards the boss instead. After the boss is defeated, it moves towards a random uncollected flag again. When the circle reaches its destination it stays in place. Its movement speed is a constant that the game designer can change.
 

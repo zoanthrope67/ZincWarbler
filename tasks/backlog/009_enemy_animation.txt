@@ -1,0 +1,7 @@
+# Pre-requirements from the human
+
+The existing placeholder enemies (Tank and Greg) must have been replaced with human authored enemies that include a valid glb with an idle animation.
+
+# Task
+
+Enemies must play an animation called "idle" if this exists. Playing animations should be handled by a helper function as new enemy types may have multiple animations. This helper function should be called on spawn (before the fade in). If no "idle" animation exists then an assert must pause the game and warn the designer. The human will have to create human crafted placeholder .glb's with "idle" animations in Blender before work can begin on this task.

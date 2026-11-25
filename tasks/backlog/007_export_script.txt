@@ -1,0 +1,1 @@
+Exporting should be done by a shell script that runs as a pre-commit git hook to ensure that the game always compiles. This script should be a bash script that is installed manually by the human.

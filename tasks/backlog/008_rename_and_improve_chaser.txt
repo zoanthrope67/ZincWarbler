@@ -1,0 +1,3 @@
+The Chaser enemy should be renamed to Buzzsaw in all places and the behaviour should be updated.
+
+The Buzzsaw will only aim towards the player on the first spawn. When the Buzzsaw collides with a wall they will bounce off it at an angle calulcated from the normal.

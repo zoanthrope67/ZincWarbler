@@ -1,0 +1,1 @@
+Enemies that are far away from the player for 10 seconds should be destroyed to save performance. The exact value must be a const that can be set by the programmer, it should default to 150 meters for now.

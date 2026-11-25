@@ -433,16 +433,12 @@ $Model/chaser/AnimationPlayer.play("spin")   # the path depends on your node nam
 
 | File | Where | Notes |
 |---|---|---|
-| `.glb` (texture stored inside it) and its `.import` file | `src/assets/handmade/models/<name>/`, e.g. `src/assets/handmade/models/chaser/chaser.glb` | Inside the Godot project, so the game can use them |
-| `.blend` and source PNGs | Outside `src/`, e.g. a top-level `art/models/` folder | Godot tries to import `.blend` files it finds in the project, which needs Blender on every machine that opens it. Exporting `.glb` avoids that |
-| `.blend1` backups | Not in git | Blender writes these on every save. Consider adding `*.blend1` to `.gitignore` |
+| `.glb` (texture stored inside it) and its `.import` file | `src/gfx/models/`, e.g. `src/gfx/models/example.glb` | Inside the Godot project, so the game can use them |
+| `.blend` and source PNGs | Outside of the project | Godot tries to import `.blend` files it finds in the project, which needs Blender on every machine that opens it. Exporting `.glb` avoids that |
 
 When a human-made model replaces a placeholder:
 - Remove the placeholder's entry from `docs/asset_tracking.txt`.
 - Add the artist's credit to `docs/credits.txt`.
-
-Assets in `src/assets/handmade` must not be uploaded anywhere without the
-designer's permission (see CLAUDE.md).
 
 ---
 
