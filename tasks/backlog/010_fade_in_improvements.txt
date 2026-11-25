@@ -1,5 +1,3 @@
-The current graphical effect for fade in should be replaced with a shader. This shader should render a red silhouette of the model. The model should also appear to be falling from the top of the screen by moving it's position Y from +100 to 0 via a lerp with an ease in. The fall must match the exact length of the fade in and changing the fade in length at a later date must change the length of the fall. Only the model should be changed, not the actual underlying Node.
+The current graphical effect for fade in should be replaced with a shader. This shader should render a red silhouette of the model. This should remain red until the instant that they are activated. The model should also appear to be falling from the top of the screen by moving it's position Y from +20 to 0 via a lerp with an ease out with a 0.6 curve. The models X and Z should lerp in the same way. The X,Z start should be 100 meters away from their current position and the direction should be the direction away from the current BorderStorm position. If there is no BorderStorm or if the direction is zero then the X,Z should come from straight up. The fall must match the exact length of the fade in and changing the fade in length at a later date must change the length of the fall. Only the model should be changed, not the actual underlying Node.
 
-# New fx_signals
-
-fx_enemy_activated (global_position of enemy, enemy class_name as str) : Will be used to spawn a particle effect on spawn.
+The default fade in time should also change to 0.5 seconds.
