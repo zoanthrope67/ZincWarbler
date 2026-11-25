@@ -13,6 +13,7 @@ src/ contains all source code
 docs/ contains all documentation
 docs/asset_tracking.txt contains a list of all placeholder assets. It does not need to include other assets.
 tasks/ contains the list of tasks that make up this project. Claude must not edit these files unless explicitly ordered to do so as one-off tasks
+tools/ contains bash scripts used to build the project
 build/ contains built executables for Linux/Windows which will be generated manually when required.
 Godot_v4.7.2-stable_linux.x86_64/ contains a copy of the Godot engine that is not tracked in git.
 

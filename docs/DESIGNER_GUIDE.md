@@ -409,3 +409,45 @@ signal (a game logic signal) and connect to the new enemy's `fx_` signals there.
 - Windows: `%APPDATA%\Godot\app_userdata\Zinc Warbler\`
 
 Delete `config.cfg` or `hiscores.json` there to reset settings or hi-scores.
+
+## Building the game (`tools/export.sh`)
+
+`tools/export.sh` checks that the game compiles and then exports both builds:
+`build/linux/ZincWarbler.x86_64` and `build/windows/ZincWarbler.exe` (each with
+a `ZincWarbler.pck` next to it, which must be shipped with it). It takes about
+15 seconds.
+
+**Install it as a git pre-commit hook** (once, by hand, from the repo's top folder):
+
+```bash
+ln -s ../../tools/export.sh .git/hooks/pre-commit
+```
+
+Every `git commit` then runs it on exactly what is being committed. If anything
+fails, the commit is stopped and the error is printed (e.g. the script and line
+of a parse error). To commit anyway, e.g. for work in progress, use
+`git commit --no-verify`. To uninstall, delete `.git/hooks/pre-commit`. Git
+does not run the hook for merges that finish without conflicts.
+
+**Run it by hand** to make builds at any time:
+
+| Command | What it builds |
+|---|---|
+| `tools/export.sh` | What is staged for commit (`git add`ed) |
+| `tools/export.sh --working-tree` | `src/` as it is on disk, including changes that are not staged |
+
+How it works:
+- It works on a temporary copy of `src/`, so an open Godot editor is not
+  disturbed. The old builds are only replaced if every step succeeds.
+- Godot's export does not stop on a broken script, so the script first loads
+  every script, scene and resource with `tools/check_project.gd`. A script with
+  errors, or a scene pointing at a missing file, fails the check. Any `ERROR:`
+  Godot prints during the import, check or export also fails it.
+- It never runs the game, so it never touches saved settings or hi-scores.
+  Shader code is not checked (headless Godot draws nothing).
+- It uses the "Linux" and "Windows Desktop" presets from Project > Export
+  (`src/export_presets.cfg`). The file names and presets are listed at the top
+  of `tools/export.sh`.
+- It needs the Godot binary in `Godot_v4.7.2-stable_linux.x86_64/` (or
+  `GODOT=/path/to/godot tools/export.sh`) and the 4.7.2 export templates
+  (Editor > Manage Export Templates).
