@@ -1,1 +1,0 @@
-A DeathClock should be added. Maybe flags and boss kills increase it to give the player more time?
