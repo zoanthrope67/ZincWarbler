@@ -27,7 +27,7 @@ extends Camera3D
 @export var view_height_meters := 40.0
 ## Vertical field of view in degrees. Lower values look flatter (less
 ## perspective) and put the camera further away.
-@export_range(10.0, 120.0) var field_of_view_degrees := 50.0
+@export_range(10.0, 120.0) var field_of_view_degrees := 90.0
 ## How far the camera leans back from straight down, in degrees.
 ## 0 = straight down (docs/SPEC.md). Higher values show the arena more from
 ## the side. Above about 40 the top of the screen can reach past the camera's
