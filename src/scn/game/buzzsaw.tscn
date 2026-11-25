@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cxybu66gxe1ti"]
 
-[ext_resource type="Script" uid="uid://d2r8vexft0o1g" path="res://scripts/game/enemy/chaser.gd" id="1_r7i5n"]
+[ext_resource type="Script" uid="uid://d2r8vexft0o1g" path="res://scripts/game/enemy/buzzsaw.gd" id="1_r7i5n"]
 [ext_resource type="PackedScene" uid="uid://cu5oua2hi54tc" path="res://gfx/models/buzzsaw.glb" id="2_t40ou"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_t40ou"]
@@ -9,7 +9,7 @@ radius = 1.0
 [sub_resource type="SphereShape3D" id="SphereShape3D_o1soq"]
 radius = 1.1
 
-[node name="Chaser" type="CharacterBody3D" unique_id=860176819]
+[node name="Buzzsaw" type="CharacterBody3D" unique_id=860176819]
 collision_layer = 0
 collision_mask = 0
 motion_mode = 1

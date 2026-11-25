@@ -7,7 +7,7 @@ Where to change things in Zinc Warbler. All paths are inside `src/`.
 | Folder | Contents |
 |---|---|
 | `scn/` | Scenes: one per game state, e.g. `main_menu.tscn`, `in_game.tscn` |
-| `scn/game/` | Gameplay scenes: `arena.tscn`, `player.tscn`, `player_bullet.tscn`, `flag.tscn`, `chaser.tscn`, `tank.tscn`, `angry_greg.tscn`, `enemy_bullet.tscn`, `border_storm.tscn` |
+| `scn/game/` | Gameplay scenes: `arena.tscn`, `player.tscn`, `player_bullet.tscn`, `flag.tscn`, `buzzsaw.tscn`, `tank.tscn`, `angry_greg.tscn`, `enemy_bullet.tscn`, `border_storm.tscn` |
 | `scripts/autoload/` | Global scripts that are always running: `GameState`, `Settings`, `Hiscores` |
 | `scripts/states/` | One script per state screen |
 | `scripts/game/` | Gameplay scripts (player, player bullets, arena, flags, camera, BorderStorm), and `gfx_effects.gd` (material effects such as the hit flash) |
@@ -195,8 +195,8 @@ Every enemy scene has settings on its root node in the Inspector:
 
 | Setting | What it does |
 |---|---|
-| `Max Hits` | Player bullet hits to defeat it (Chaser 2, Tank 2, Angry Greg 5) |
-| `Score Value` | Score when defeated (Chaser 0, Tank 0, Angry Greg 10) |
+| `Max Hits` | Player bullet hits to defeat it (Buzzsaw 2, Tank 2, Angry Greg 5) |
+| `Score Value` | Score when defeated (Buzzsaw 0, Tank 0, Angry Greg 10) |
 | `Is Boss` | Marks bosses. Bosses are never removed for being far away (below). Bosses in the FlagLoop's `Boss Scenes` are always treated as bosses, even if this is left unticked |
 | `Hit Flash Material` | Shown on the model for a moment each time it is hit (red placeholder: `gfx/placeholder/placeholder_hit_flash.tres`). Clear it for no flash |
 | `Hit Flash Seconds` | How long the hit flash shows (0.1) |
@@ -206,7 +206,7 @@ Behaviour numbers are constants at the top of each script:
 | Script | Constants |
 |---|---|
 | `scripts/game/enemy/enemy.gd` (all enemies) | `FADE_IN_SECONDS` (0.25), `BULLET_SPAWN_GAP`, `FAR_AWAY_DISTANCE` (150), `FAR_AWAY_SECONDS` (10) |
-| `scripts/game/enemy/chaser.gd` | `SPEED` |
+| `scripts/game/enemy/buzzsaw.gd` | `SPEED`, `MAX_BOUNCES_PER_FRAME` (2) |
 | `scripts/game/enemy/tank.gd` | `SPEED`, `FIRE_INTERVAL` (4), `BULLET_SPEED` |
 | `scripts/game/enemy/angry_greg.gd` | `FIRE_INTERVAL` (4), `BULLET_SPEED` |
 
@@ -228,7 +228,7 @@ and change `Flash Color` under Shader Parameters (that changes it for every
 enemy using it). For one enemy only, make a new material and set it on that
 enemy's scene.
 
-**Adding a new enemy:** copy `scn/game/chaser.tscn`, give it a new script that
+**Adding a new enemy:** copy `scn/game/buzzsaw.tscn`, give it a new script that
 starts with `extends Enemy`, and fill in `_on_activated()` (runs once, when the
 fade-in ends) and `_active_physics_process(delta)` (runs every frame after that).
 Helpers you can use: `direction_to_target()`, `get_target_position()`,
@@ -261,7 +261,7 @@ A wave is a group of one type of enemy, written in code as
 
 | Field | What it does |
 |---|---|
-| `enemy` | The enemy scene, e.g. `CHASER` or `TANK` (constants at the top of the spawner) |
+| `enemy` | The enemy scene, e.g. `BUZZSAW` or `TANK` (constants at the top of the spawner) |
 | `count` | How many enemies the wave spawns (1 or more) |
 | `wave_delay_seconds` | Seconds between each enemy of the wave. 0 spawns the whole wave at once |
 | `next_wave_delay` | Seconds from the **start** of this wave until the next wave starts |

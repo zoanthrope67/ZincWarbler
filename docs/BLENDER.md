@@ -57,7 +57,7 @@ example, orange turning grey-green). The import setting in
    - In **Object Properties > Viewport Display**, set **Display As: Wire**.
    - It is only a guide. It won't be exported, because export uses
      "Selected Objects" (section 5).
-4. Save the file (**Ctrl+S**), for example as `chaser.blend`. See
+4. Save the file (**Ctrl+S**), for example as `buzzsaw.blend`. See
    [Where to keep files](#8-where-to-keep-files) below.
 
 ---
@@ -108,7 +108,7 @@ uses one tiny texture, and colours are easy to change later.
 1. **Make the palette image** in any paint program (Krita, GIMP, Aseprite…).
    - Use a small PNG such as **32 x 32**, filled with blocks of flat colour.
      For example, a 4 x 4 grid of 8 x 8 pixel squares gives 16 colours.
-   - Save it next to the `.blend` file, e.g. `chaser_palette.png`.
+   - Save it next to the `.blend` file, e.g. `buzzsaw_palette.png`.
 2. **Make the material.** Select the model and switch to the **Shading**
    workspace (tabs at the top of the window).
    - In the node editor, click **New** to make a material. You get a
@@ -172,7 +172,7 @@ For more detail, such as markings or a face:
 | Data > Material | Materials | Export; Images: Automatic (the defaults) |
 | Animation | Animation | Off, unless the model has animations you want (see [section 7](#7-animating-parts) for the settings) |
 
-4. Name the file after the character (e.g. `chaser.glb`). Export it straight
+4. Name the file after the character (e.g. `buzzsaw.glb`). Export it straight
    into the Godot project folder (see [section 8](#8-where-to-keep-files)).
    Use the **same name every time** you re-export, so Godot updates the model
    in the game automatically.
@@ -269,13 +269,14 @@ the same problem with palettes. It is not worth using here.
 
 ### Replace an enemy's placeholder
 
-The example uses the Chaser; the Tank and Angry Greg work the same way.
+The example uses the Buzzsaw, which has already been done this way (open
+`scn/game/buzzsaw.tscn` to see the result); the Tank and Angry Greg work the same way.
 
-1. Open `scn/game/chaser.tscn`.
+1. Open `scn/game/buzzsaw.tscn`.
 2. Expand the **Model** node and delete `PlaceholderBody` and
    `PlaceholderNose`. For the Tank it is `PlaceholderBarrel`; for Greg, also
    `PlaceholderBrowLeft` and `PlaceholderBrowRight`.
-3. Drag `chaser.glb` from the FileSystem dock onto the **Model** node. Its
+3. Drag `buzzsaw.glb` from the FileSystem dock onto the **Model** node. Its
    Position and Rotation should be 0, 0, 0.
 4. Check the facing: with the new model selected, the blue (Z) arrow of the
    move gizmo should point out of the model's front. The code turns **Model**
@@ -404,7 +405,7 @@ as long as the animation name stays the same.
 in, add a line to that enemy's `_on_activated()`:
 
 ```gdscript
-$Model/chaser/AnimationPlayer.play("spin")   # the path depends on your node names
+$Model/buzzsaw/AnimationPlayer.play("spin")   # the path depends on your node names
 ```
 
 ### Other ways to move a part

@@ -51,7 +51,7 @@ var _active_waves: Array[ActiveWave] = []
 
 var queued_waves: Array = []
 
-const CHASER := preload("res://scn/game/chaser.tscn")
+const BUZZSAW := preload("res://scn/game/buzzsaw.tscn")
 const TANK := preload("res://scn/game/tank.tscn")
 
 ## Connects the spawner to the game. Called by the In Game scene.
@@ -71,25 +71,25 @@ func get_bag_via_danger():
 	
 	if _game.danger_level < 10:
 		current_bag = [
-			EnemyWave.new(CHASER, 10, 0.2, 4.0),
+			EnemyWave.new(BUZZSAW, 10, 0.2, 4.0),
 		]
 	elif _game.danger_level < 50:
 		current_bag = [
-			EnemyWave.new(CHASER, 3, 0.2, 1.0),
-			EnemyWave.new(CHASER, 3, 0.2, 1.0),
+			EnemyWave.new(BUZZSAW, 3, 0.2, 1.0),
+			EnemyWave.new(BUZZSAW, 3, 0.2, 1.0),
 			EnemyWave.new(TANK, 3, 0.2, 1.0),
 		]
 	elif _game.danger_level < 100:
 		current_bag = [
-			EnemyWave.new(CHASER, 3, 0.2, 1.0),
-			EnemyWave.new(CHASER, 30, 0.1, 2.0),
+			EnemyWave.new(BUZZSAW, 3, 0.2, 1.0),
+			EnemyWave.new(BUZZSAW, 30, 0.1, 2.0),
 			EnemyWave.new(TANK, 1, 0.2, 0),
 			EnemyWave.new(TANK, 2, 0.2, 0.2),
 		]
 	else:
 		# The most dangerous bag!
 		current_bag = [
-			EnemyWave.new(CHASER, 10, 0.2, 1.0)
+			EnemyWave.new(BUZZSAW, 10, 0.2, 1.0)
 		]
 
 	assert(not current_bag.is_empty())

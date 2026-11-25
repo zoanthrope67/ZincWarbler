@@ -13,7 +13,7 @@ extends CharacterBody3D
 ##      than FAR_AWAY_DISTANCE from the player for FAR_AWAY_SECONDS is removed
 ##      to save performance. That is not a defeat: no score, no `defeated`.
 ##
-## To make a new enemy: make a scene like scn/game/chaser.tscn, and a script that
+## To make a new enemy: make a scene like scn/game/buzzsaw.tscn, and a script that
 ## extends Enemy and overrides _on_activated() and/or _active_physics_process().
 ## Use shoot_at_target() to fire an enemy bullet at the player, move_sliding() to
 ## move while gliding along walls, and is_pushing_into_player() to skip moving

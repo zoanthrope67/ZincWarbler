@@ -107,7 +107,7 @@ The camera should be Perspective view and give a view of 40 meters around the pl
 There are two types of normal enemy and one type of boss. The human game designer will add more enemies and bosses at a later date. All enemies and bosses use a sphere hitbox.
 
 The normal enemies are:
- * Chaser: Faces towards the player on first spawn and then moves in that facing. If they collide with a wall then they attempt to shapecast towards the player using a get_world_3d().direct_space_state.cast_motion that only checks walls. If they can find an unobstructed path then they face towards the player, otherwise they flip their facing 180 degrees. Their speed is a constant that the game designer can change. Can take 2 hits before being defeated.
+ * Buzzsaw: Faces towards the player when it finishes spawning (the end of its fade in) and then moves in that facing. It never aims at the player again. If it collides with a wall then it bounces off it: the new direction mirrors the old one in the wall's collision normal (angle in equals angle out), and its speed does not change. Running into the player does not change its direction. Their speed is a constant that the game designer can change. Can take 2 hits before being defeated.
  * Tank: Moves towards the player. Their speed is a constant that the game designer can change. If they collide with a wall then they slide along it. No advanced pathfinding will be required for this enemy. Fires an enemy bullet every 4 seconds towards the player with the first shot 4 seconds after they finish spawning. Can take 2 hits before being defeated.
 
 Enemies are 2x2 meters large. Score is not awarded for killing an enemy. There should be no cap on enemy spawns for now, future development will consider this.

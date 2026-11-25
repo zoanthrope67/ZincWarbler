@@ -19,8 +19,8 @@ Every enemy is two files:
 
 | File | What it holds |
 |---|---|
-| A scene, e.g. `scn/game/chaser.tscn` | Its size, hitboxes, look, and the Inspector settings (hits, score) |
-| A script, e.g. `scripts/game/enemy/chaser.gd` | How it moves and attacks |
+| A scene, e.g. `scn/game/buzzsaw.tscn` | Its size, hitboxes, look, and the Inspector settings (hits, score) |
+| A script, e.g. `scripts/game/enemy/buzzsaw.gd` | How it moves and attacks |
 
 Every enemy script starts with `extends Enemy`. The shared script
 `scripts/game/enemy/enemy.gd` already does everything all enemies have in
@@ -50,7 +50,7 @@ in `enemy.gd`). That is not a defeat: no score, and `defeated` is not emitted.
 Bosses are never removed this way.
 
 Look at the existing enemies for examples; they are short and commented:
-- `chaser.gd` moves in a straight line and turns at walls.
+- `buzzsaw.gd` moves in a straight line and bounces off walls.
 - `tank.gd` moves towards the player and shoots.
 - `angry_greg.gd`, a boss, stands still and shoots.
 
@@ -271,7 +271,7 @@ script attached instead (Step 1).
 
 Open `scripts/game/enemy/enemy_spawner.gd`.
 
-1. Next to `CHASER` and `TANK` near the top, add a constant for your scene:
+1. Next to `BUZZSAW` and `TANK` near the top, add a constant for your scene:
 
    ```gdscript
    const DARTER := preload("res://scn/game/darter.tscn")
@@ -284,7 +284,7 @@ Open `scripts/game/enemy/enemy_spawner.gd`.
    ```gdscript
    elif _game.danger_level < 50:
        current_bag = [
-           EnemyWave.new(CHASER, 3, 0.2, 1.0),
+           EnemyWave.new(BUZZSAW, 3, 0.2, 1.0),
            EnemyWave.new(DARTER, 2, 0.5, 2.0),   # 2 Darters, 0.5 s apart, next wave 2 s later
            ...
    ```
